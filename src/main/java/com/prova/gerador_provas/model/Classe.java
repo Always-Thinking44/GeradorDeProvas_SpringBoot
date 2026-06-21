@@ -2,7 +2,7 @@ package com.prova.gerador_provas.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 @Entity
@@ -17,6 +17,8 @@ public class Classe{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "O nome da classe é obrigatório")
+    @Size(min = 2, max = 5, message = "O nome deve ter entre 2 e 5 caracteres")
     @Column(nullable = false)
     private String nome;
 
