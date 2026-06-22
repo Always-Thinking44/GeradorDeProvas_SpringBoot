@@ -19,7 +19,7 @@ public class Classe{
 
     @NotBlank(message = "O nome da classe é obrigatório")
     @Size(min = 2, max = 5, message = "O nome deve ter entre 2 e 5 caracteres")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nome;
 
     @OneToMany(mappedBy = "classe")

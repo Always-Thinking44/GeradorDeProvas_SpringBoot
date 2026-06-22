@@ -22,7 +22,7 @@ public class Disciplina {
 
     @NotBlank(message = "O nome da disciplina é obrigatório")
     @Size(min = 2, max = 70, message = "O nome deve ter entre 2 e 70 caracteres")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nome;
 
     @OneToMany(mappedBy = "disciplina")
