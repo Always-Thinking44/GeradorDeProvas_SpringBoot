@@ -11,4 +11,6 @@ public interface ClasseRepository
     Optional<Classe> findByNome(String nome);
 
     boolean existsByNome(String nome);
+
+    boolean existsByNomeIgnoreCase(String nome);
 }
