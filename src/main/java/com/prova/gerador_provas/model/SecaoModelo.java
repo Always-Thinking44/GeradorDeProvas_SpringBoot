@@ -1,6 +1,8 @@
 package com.prova.gerador_provas.model;
 import lombok.*;
 import jakarta.persistence.*;
+import com.prova.gerador_provas.enums.NivelDificuldade;
+import com.prova.gerador_provas.enums.TipoPergunta;
 
 
 @Entity
@@ -20,9 +22,11 @@ public class SecaoModelo {
     @ManyToOne
     private ModeloProva modeloProva;
 
-    @ManyToOne
-    private TipoPergunta tipoPergunta;
-
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private NivelDificuldade nivelDificuldade;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoPergunta tipoPergunta;
 }

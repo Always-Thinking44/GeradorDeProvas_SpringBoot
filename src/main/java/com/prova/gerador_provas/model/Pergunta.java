@@ -1,6 +1,9 @@
 package com.prova.gerador_provas.model;
 import lombok.*;
 import jakarta.persistence.*;
+import com.prova.gerador_provas.enums.NivelDificuldade;
+import com.prova.gerador_provas.enums.TipoPergunta;
+import com.prova.gerador_provas.enums.Trimestre;
 
 @Entity
 @Table(name = "perguntas")
@@ -28,14 +31,17 @@ public class Pergunta {
     private Disciplina disciplina;
 
     @ManyToOne
-    private Trimestre trimestre;
-
-    @ManyToOne
     private Tema tema;
 
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NivelDificuldade nivelDificuldade;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TipoPergunta tipoPergunta;
 
-    @ManyToOne
-    private NivelDificuldade nivelDificuldade;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Trimestre trimestre;
 }
