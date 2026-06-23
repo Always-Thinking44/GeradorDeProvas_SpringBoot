@@ -17,4 +17,9 @@ public interface TemaRepository
             Long disciplinaId,
             Long trimestreId
     );
+
+    boolean existsByNomeIgnoreCaseAndDisciplinaId(
+            String nome,
+            Long disciplinaId
+    );
 }

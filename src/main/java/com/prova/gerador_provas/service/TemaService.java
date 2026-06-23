@@ -24,15 +24,32 @@ public class TemaService {
     }
 
     public Tema save(Tema tema) {
+        if (repository
+                .existsByNomeIgnoreCaseAndDisciplinaId(
+                        tema.getNome(),
+                        tema.getDisciplina().getId())) {
+
+            throw new IllegalArgumentException(
+                    "This theme already exists in this subject.");
+        }
         return repository.save(tema);
     }
 
     public Tema update(Long id, Tema tema) {
         Tema existing = findById(id);
 
+
         existing.setNome(tema.getNome());
         existing.setDisciplina(tema.getDisciplina());
 
+        if (repository
+                .existsByNomeIgnoreCaseAndDisciplinaId(
+                        tema.getNome(),
+                        tema.getDisciplina().getId())) {
+
+            throw new IllegalArgumentException(
+                    "This theme already exists in this subject.");
+        }
         return repository.save(existing);
     }
 
