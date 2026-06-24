@@ -1,4 +1,5 @@
 package com.prova.gerador_provas.model;
+import com.prova.gerador_provas.enums.Trimestre;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.persistence.*;
@@ -27,7 +28,7 @@ public class Tema {
     @JoinColumn(name = "classe_id")
     private Classe classe;
 
-    @ManyToOne
-    @JoinColumn(name = "trimestre_id")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Trimestre trimestre;
 }

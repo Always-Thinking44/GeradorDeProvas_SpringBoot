@@ -1,4 +1,5 @@
 package com.prova.gerador_provas.model;
+import com.prova.gerador_provas.enums.Trimestre;
 import lombok.*;
 import jakarta.persistence.*;
 
@@ -28,6 +29,7 @@ public class ProvaGerada {
     @ManyToOne
     private Disciplina disciplina;
 
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Trimestre trimestre;
 }
