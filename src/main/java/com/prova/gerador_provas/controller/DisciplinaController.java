@@ -3,11 +3,12 @@ package com.prova.gerador_provas.controller;
 import com.prova.gerador_provas.model.Disciplina;
 import com.prova.gerador_provas.service.DisciplinaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
-@RestController
+@Controller
 @RequestMapping("/disciplinas")
 @RequiredArgsConstructor
 public class DisciplinaController {

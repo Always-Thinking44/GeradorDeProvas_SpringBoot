@@ -3,10 +3,11 @@ package com.prova.gerador_provas.controller;
 import com.prova.gerador_provas.model.Classe;
 import com.prova.gerador_provas.service.ClasseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/classe")
 @RequiredArgsConstructor
 public class ClasseController {

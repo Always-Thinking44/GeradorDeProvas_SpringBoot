@@ -3,10 +3,11 @@ package com.prova.gerador_provas.controller;
 import com.prova.gerador_provas.model.Pergunta;
 import com.prova.gerador_provas.service.PerguntaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/pergunta")
 @RequiredArgsConstructor
 

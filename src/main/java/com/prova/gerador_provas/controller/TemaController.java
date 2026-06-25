@@ -3,10 +3,11 @@ package com.prova.gerador_provas.controller;
 import com.prova.gerador_provas.model.Tema;
 import com.prova.gerador_provas.service.TemaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/temas")
 @RequiredArgsConstructor
 public class TemaController {
