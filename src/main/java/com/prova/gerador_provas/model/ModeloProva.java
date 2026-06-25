@@ -3,6 +3,9 @@ import com.prova.gerador_provas.enums.Trimestre;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "modelos_prova")
@@ -29,4 +32,11 @@ public class ModeloProva {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Trimestre trimestre;
+
+    @OneToMany(
+            mappedBy = "modeloProva",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<SecaoModelo> secoes = new ArrayList<>();
 }
