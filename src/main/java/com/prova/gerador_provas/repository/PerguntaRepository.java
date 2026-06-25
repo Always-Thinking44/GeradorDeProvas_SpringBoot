@@ -2,7 +2,6 @@ package com.prova.gerador_provas.repository;
 
 import com.prova.gerador_provas.enums.NivelDificuldade;
 import com.prova.gerador_provas.enums.TipoPergunta;
-import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.Pergunta;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -33,7 +32,7 @@ public interface PerguntaRepository extends JpaRepository<Pergunta, Long> {
     List <Pergunta> findRandomQuestions(
             Long classId,
             Long subjectId,
-            Trimestre trimestre,
+            Long trimestre,
             TipoPergunta getTipoPergunta,
             NivelDificuldade getNivelDificuldade);
 

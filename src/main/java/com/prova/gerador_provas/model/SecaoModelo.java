@@ -17,7 +17,7 @@ public class SecaoModelo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer quantidadeQuestoes;
+    private Integer quantidade;
 
     @ManyToOne
     private ModeloProva modeloProva;

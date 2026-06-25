@@ -4,6 +4,8 @@ import lombok.*;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "provas_geradas")
@@ -32,4 +34,11 @@ public class ProvaGerada {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Trimestre trimestre;
+    @ManyToMany
+    @JoinTable(
+            name = "prova_geradas",
+            joinColumns = @JoinColumn(name = "prova_id"),
+            inverseJoinColumns = @JoinColumn(name = "pergunta_id")
+    )
+    private List<Pergunta> perguntas = new ArrayList<>();
 }
