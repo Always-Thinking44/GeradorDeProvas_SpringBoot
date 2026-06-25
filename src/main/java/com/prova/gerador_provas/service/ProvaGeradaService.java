@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -24,7 +25,7 @@ public class ProvaGeradaService {
     public ProvaGerada generateExam(
             Long classId,
             Long subjectId,
-            Trimestre trimestre) {
+            Long trimestre) {
 
         ModeloProva modelo =
                 modeloRepository

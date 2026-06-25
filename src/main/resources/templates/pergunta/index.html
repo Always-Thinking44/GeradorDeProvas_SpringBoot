@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Perguntas</title>
+
+  <style>
+
+    body{
+      font-family: Arial;
+      margin: 40px;
+    }
+
+    button{
+      padding:10px 20px;
+      cursor:pointer;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin-top:20px;
+    }
+
+    th, td{
+      border:1px solid #ddd;
+      padding:10px;
+    }
+
+    th{
+      background:#f5f5f5;
+    }
+
+    .modal{
+      display:none;
+      position:fixed;
+      left:0;
+      top:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,.5);
+    }
+
+    .modal-content{
+      background:white;
+      width:700px;
+      margin:40px auto;
+      padding:20px;
+      border-radius:10px;
+    }
+
+    input,
+    select,
+    textarea{
+      width:100%;
+      padding:10px;
+      margin-bottom:15px;
+    }
+
+  </style>
+
+</head>
+<body>
+
+<h1>Cadastro de Perguntas</h1>
+
+<button onclick="abrirModal()">
+  Nova Pergunta
+</button>
+
+<table>
+
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Enunciado</th>
+    <th>Classe</th>
+    <th>Disciplina</th>
+    <th>Trimestre</th>
+    <th>Dificuldade</th>
+  </tr>
+  </thead>
+
+  <tbody>
+
+  <tr th:each="p : ${perguntas}">
+
+    <td th:text="${p.id}"></td>
+    <td th:text="${p.enunciado}"></td>
+    <td th:text="${p.classe?.nome}"></td>
+    <td th:text="${p.disciplina?.nome}"></td>
+    <td th:text="${p.trimestre}"></td>
+    <td th:text="${p.nivelDificuldade}"></td>
+
+  </tr>
+
+  </tbody>
+
+</table>
+
+<!-- MODAL -->
+
+<div class="modal" id="modalPergunta">
+
+  <div class="modal-content">
+
+    <h2>Nova Pergunta</h2>
+
+    <form th:action="@{/pergunta/salvar}"
+          th:object="${pergunta}"
+          method="post">
+
+      <label>Enunciado</label>
+
+      <textarea
+              th:field="*{enunciado}"
+              rows="5">
+            </textarea>
+
+      <label>Classe</label>
+
+      <select name="classeId">
+
+        <option value="">
+          Selecione
+        </option>
+
+        <option
+                th:each="c : ${classes}"
+                th:value="${c.id}"
+                th:text="${c.nome}">
+        </option>
+
+      </select>
+
+      <label>Disciplina</label>
+
+      <select name="disciplinaId">
+
+        <option value="">
+          Selecione
+        </option>
+
+        <option
+                th:each="d : ${disciplinas}"
+                th:value="${d.id}"
+                th:text="${d.nome}">
+        </option>
+
+      </select>
+
+      <label>Tema</label>
+
+      <select name="temaId">
+
+        <option value="">
+          Selecione
+        </option>
+
+        <option
+                th:each="t : ${temas}"
+                th:value="${t.id}"
+                th:text="${t.nome}">
+        </option>
+
+      </select>
+
+      <label>Trimestre</label>
+
+      <select th:field="*{trimestre}">
+        <option value="PRIMEIRO">PRIMEIRO</option>
+        <option value="SEGUNDO">SEGUNDO</option>
+        <option value="TERCEIRO">TERCEIRO</option>
+      </select>
+
+      <label>Tipo de Pergunta</label>
+
+      <select th:field="*{tipoPergunta}">
+        <option value="ESCOLHA_MULTIPLA">
+          ESCOLHA MÚLTIPLA
+        </option>
+        <option value="VERDADEIRO_FALSO">
+          VERDADEIRO OU FALSO
+        </option>
+        <option value="DESENVOLVIMENTO">
+          DESENVOLVIMENTO
+        </option>
+      </select>
+
+      <label>Nível de Dificuldade</label>
+
+      <select th:field="*{nivelDificuldade}">
+        <option value="FACIL">FÁCIL</option>
+        <option value="MEDIO">MÉDIO</option>
+        <option value="DIFICIL">DIFÍCIL</option>
+      </select>
+
+      <button type="submit">
+        Salvar
+      </button>
+
+      <button
+              type="button"
+              onclick="fecharModal()">
+
+        Cancelar
+
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+
+  function abrirModal() {
+    document.getElementById("modalPergunta")
+            .style.display = "block";
+  }
+
+  function fecharModal() {
+    document.getElementById("modalPergunta")
+            .style.display = "none";
+  }
+
+</script>
+
+</body>
+</html>

@@ -18,7 +18,7 @@ public interface ModeloProvaRepository
     List<ModeloProva> findByTrimestreId(Long trimestreId);
 
     Optional<ModeloProva>
-    findByClasseIdAndDisciplinaIdAndTrimestreId(
+    findByClasseIdAndDisciplinaIdAndTrimestre(
             Long classeId,
             Long disciplinaId,
             Long trimestreId
