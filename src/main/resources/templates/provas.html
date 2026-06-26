@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+
+<th:block layout:fragment="page-title">Provas Geradas</th:block>
+<th:block layout:fragment="breadcrumb">Provas › Provas Geradas</th:block>
+
+<th:block layout:fragment="head-extra">
+<style>
+    .gerar-banner {
+        background: linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(6,182,212,0.1) 100%);
+        border: 1px solid rgba(37,99,235,0.3);
+        border-radius: var(--radius);
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+    .gerar-banner-text h2 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .gerar-banner-text p {
+        font-size: 13px;
+        color: var(--muted);
+    }
+    .perguntas-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    .pergunta-item {
+        background: var(--navy);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    .pergunta-item strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+    .pergunta-meta {
+        display: flex;
+        gap: 8px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+    }
+</style>
+</th:block>
+
+<th:block layout:fragment="content">
+
+<!-- Banner gerar prova -->
+<div class="gerar-banner">
+    <div class="gerar-banner-text">
+        <h2>Gerar nova prova</h2>
+        <p>Seleccione turma, disciplina e trimestre. O sistema escolherá automaticamente as perguntas com base no modelo definido.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('modal-gerar')" style="white-space:nowrap;flex-shrink:0">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Gerar prova
+    </button>
+</div>
+
+<!-- Tabela provas -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Histórico de provas geradas</span>
+    </div>
+
+    <div class="tbl-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Data de geração</th>
+                    <th>Turma</th>
+                    <th>Disciplina</th>
+                    <th>Trimestre</th>
+                    <th>N.º de perguntas</th>
+                    <th style="width:80px">Detalhes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(provas)}">
+                    <td colspan="7" class="empty-state">Nenhuma prova gerada ainda. Clique em "Gerar prova" para começar.</td>
+                </tr>
+                <tr th:each="p : ${provas}">
+                    <td class="font-mono text-muted" th:text="${p.id}">1</td>
+                    <td th:text="${#temporals.format(p.dataGeracao, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:30</td>
+                    <td th:text="${p.classe?.nome}">10.ª A</td>
+                    <td th:text="${p.disciplina?.nome}">Matemática</td>
+                    <td th:text="${p.trimestre.name() == 'PRIMEIRO'} ? '1.º' :
+                                 (${p.trimestre.name() == 'SEGUNDO'} ? '2.º' : '3.º')">1.º</td>
+                    <td>
+                        <span class="badge badge-blue" th:text="${#lists.size(p.perguntas)} + ' perguntas'">10 perguntas</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm"
+                                th:attr="data-id=${p.id}"
+                                onclick="verDetalhes(this)">Ver</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ═══ MODAL GERAR ═══ -->
+<div class="modal-backdrop" id="modal-gerar">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Gerar nova prova</span>
+            <button class="modal-close" onclick="closeModal('modal-gerar')">✕</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px">
+            O sistema irá procurar o modelo correspondente à turma, disciplina e trimestre seleccionados e sortear automaticamente as perguntas.
+        </p>
+
+        <div class="form-group">
+            <label class="form-label">Turma <span style="color:var(--danger)">*</span></label>
+            <select id="gen-classe" class="form-control">
+                <option value="">Seleccionar...</option>
+                <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.nome}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Disciplina <span style="color:var(--danger)">*</span></label>
+            <select id="gen-disciplina" class="form-control">
+                <option value="">Seleccionar...</option>
+                <option th:each="d : ${disciplinas}" th:value="${d.id}" th:text="${d.nome}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Trimestre <span style="color:var(--danger)">*</span></label>
+            <select id="gen-trimestre" class="form-control">
+                <option value="">Seleccionar...</option>
+                <option value="1">1.º Trimestre</option>
+                <option value="2">2.º Trimestre</option>
+                <option value="3">3.º Trimestre</option>
+            </select>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+            <button class="btn btn-ghost" onclick="closeModal('modal-gerar')">Cancelar</button>
+            <button class="btn btn-primary" id="btn-gerar" onclick="gerarProva()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Gerar agora
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL DETALHES ═══ -->
+<div class="modal-backdrop" id="modal-detalhes">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <span class="modal-title" id="det-titulo">Detalhes da prova</span>
+            <button class="modal-close" onclick="closeModal('modal-detalhes')">✕</button>
+        </div>
+        <div style="display:flex;gap:20px;margin-bottom:16px;font-size:13px;color:var(--muted)">
+            <span>Turma: <strong id="det-classe" style="color:var(--text)">—</strong></span>
+            <span>Disciplina: <strong id="det-disciplina" style="color:var(--text)">—</strong></span>
+            <span>Trimestre: <strong id="det-trimestre" style="color:var(--text)">—</strong></span>
+            <span>Data: <strong id="det-data" style="color:var(--text)">—</strong></span>
+        </div>
+        <hr class="divider"/>
+        <div class="perguntas-preview" id="det-perguntas">
+            <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">A carregar...</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:16px">
+            <button class="btn btn-ghost" onclick="closeModal('modal-detalhes')">Fechar</button>
+        </div>
+    </div>
+</div>
+
+</th:block>
+
+<th:block layout:fragment="scripts">
+<script>
+    async function gerarProva() {
+        const classId   = document.getElementById('gen-classe').value;
+        const subjectId = document.getElementById('gen-disciplina').value;
+        const termId    = document.getElementById('gen-trimestre').value;
+
+        if (!classId)   { showToast('Seleccione a turma.', 'error'); return; }
+        if (!subjectId) { showToast('Seleccione a disciplina.', 'error'); return; }
+        if (!termId)    { showToast('Seleccione o trimestre.', 'error'); return; }
+
+        const btn = document.getElementById('btn-gerar');
+        btn.disabled = true;
+        btn.textContent = 'A gerar...';
+
+        try {
+            const res = await fetch(
+                `/prova_gerada/generate?classId=${classId}&subjectId=${subjectId}&termId=${termId}`,
+                { method: 'POST' }
+            );
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err || 'Não foi possível gerar a prova. Verifique se existe um modelo configurado.');
+            }
+            closeModal('modal-gerar');
+            showToast('Prova gerada com sucesso!');
+            setTimeout(() => location.reload(), 900);
+        } catch (e) {
+            showToast(e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Gerar agora`;
+        }
+    }
+
+    async function verDetalhes(btn) {
+        const id = btn.dataset.id;
+        openModal('modal-detalhes');
+        document.getElementById('det-perguntas').innerHTML =
+            '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">A carregar...</div>';
+
+        try {
+            const res = await fetch(`/prova_gerada/${id}`);
+            const p   = await res.json();
+
+            document.getElementById('det-titulo').textContent    = `Prova #${p.id}`;
+            document.getElementById('det-classe').textContent    = p.classe?.nome || '—';
+            document.getElementById('det-disciplina').textContent = p.disciplina?.nome || '—';
+
+            const trMap = { PRIMEIRO: '1.º', SEGUNDO: '2.º', TERCEIRO: '3.º' };
+            document.getElementById('det-trimestre').textContent = trMap[p.trimestre] || p.trimestre;
+
+            if (p.dataGeracao) {
+                const d = new Date(p.dataGeracao);
+                document.getElementById('det-data').textContent =
+                    d.toLocaleDateString('pt-PT') + ' ' + d.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
+            }
+
+            const tipoLabel = { ESCOLHA_MULTIPLA:'Múltipla', VERDADEIRO_FALSO:'V/F', DESENVOLVIMENTO:'Desenv.', COMPLETAR:'Completar' };
+            const nivelCls  = { FACIL:'badge-green', MEDIO:'badge-warn', DIFICIL:'badge-red' };
+            const nivelLbl  = { FACIL:'Fácil', MEDIO:'Médio', DIFICIL:'Difícil' };
+
+            const cont = document.getElementById('det-perguntas');
+            if (!p.perguntas?.length) {
+                cont.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Sem perguntas.</div>';
+                return;
+            }
+
+            cont.innerHTML = p.perguntas.map((q, i) => `
+                <div class="pergunta-item">
+                    <strong>${i + 1}. ${q.enunciado}</strong>
+                    <div class="pergunta-meta">
+                        <span class="badge badge-blue">${tipoLabel[q.tipoPergunta] || q.tipoPergunta}</span>
+                        <span class="badge ${nivelCls[q.nivelDificuldade] || ''}">${nivelLbl[q.nivelDificuldade] || q.nivelDificuldade}</span>
+                        ${q.tema ? `<span class="badge badge-cyan">${q.tema.nome}</span>` : ''}
+                        ${q.pontuacao ? `<span style="font-size:11px;color:var(--muted)">${q.pontuacao} pt</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            document.getElementById('det-perguntas').innerHTML =
+                '<div style="color:var(--danger);text-align:center;padding:20px">Erro ao carregar detalhes.</div>';
+        }
+    }
+</script>
+</th:block>
+</html>

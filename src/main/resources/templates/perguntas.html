@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+
+<th:block layout:fragment="page-title">Perguntas</th:block>
+<th:block layout:fragment="breadcrumb">Cadastro › Perguntas</th:block>
+
+<th:block layout:fragment="head-extra">
+<style>
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+    .filter-bar select, .filter-bar input {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: var(--text);
+        font-family: 'Inter', sans-serif;
+    }
+    .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--blue); }
+
+    /* Respostas dinâmicas */
+    .respostas-container { display: flex; flex-direction: column; gap: 8px; }
+    .resposta-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--navy);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+    }
+    .resposta-row input[type="text"] {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text);
+        font-size: 13.5px;
+        font-family: 'Inter', sans-serif;
+    }
+    .resposta-row input[type="text"]:focus { outline: none; }
+    .resposta-row .correct-toggle {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: var(--muted);
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .resposta-row .correct-toggle input { cursor: pointer; accent-color: var(--success); }
+    .resposta-row .correct-toggle.is-correct { color: var(--success); font-weight: 600; }
+    .btn-add-resp {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        color: var(--muted);
+        font-size: 13px;
+        cursor: pointer;
+        width: 100%;
+        transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-add-resp:hover { border-color: var(--blue); color: var(--blue-l); }
+    .resp-section { display: none; margin-top: 4px; }
+    .resp-section.visible { display: block; }
+</style>
+</th:block>
+
+<th:block layout:fragment="content">
+
+<!-- Filtros -->
+<div class="filter-bar">
+    <select id="f-classe" onchange="filtrar()">
+        <option value="">Todas as turmas</option>
+        <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.nome}"></option>
+    </select>
+    <select id="f-disciplina" onchange="filtrar()">
+        <option value="">Todas as disciplinas</option>
+        <option th:each="d : ${disciplinas}" th:value="${d.id}" th:text="${d.nome}"></option>
+    </select>
+    <select id="f-trimestre" onchange="filtrar()">
+        <option value="">Todos os trimestres</option>
+        <option value="PRIMEIRO">1.º Trimestre</option>
+        <option value="SEGUNDO">2.º Trimestre</option>
+        <option value="TERCEIRO">3.º Trimestre</option>
+    </select>
+    <select id="f-tipo" onchange="filtrar()">
+        <option value="">Todos os tipos</option>
+        <option value="ESCOLHA_MULTIPLA">Escolha Múltipla</option>
+        <option value="VERDADEIRO_FALSO">Verdadeiro / Falso</option>
+        <option value="DESENVOLVIMENTO">Desenvolvimento</option>
+        <option value="COMPLETAR">Completar</option>
+    </select>
+    <input id="f-busca" type="text" placeholder="Pesquisar enunciado..." oninput="filtrar()" style="flex:1;min-width:180px"/>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Banco de perguntas</span>
+        <button class="btn btn-primary" onclick="abrirModalNova()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nova pergunta
+        </button>
+    </div>
+
+    <div class="tbl-wrap">
+        <table id="tbl-perguntas">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Enunciado</th>
+                    <th>Tipo</th>
+                    <th>Nível</th>
+                    <th>Turma</th>
+                    <th>Disciplina</th>
+                    <th>Trimestre</th>
+                    <th style="width:100px">Acções</th>
+                </tr>
+            </thead>
+            <tbody id="tbl-body">
+                <tr th:if="${#lists.isEmpty(perguntas)}">
+                    <td colspan="8" class="empty-state">Nenhuma pergunta registada. Adicione a primeira.</td>
+                </tr>
+                <tr th:each="p : ${perguntas}"
+                    th:data-classe="${p.classe?.id}"
+                    th:data-disciplina="${p.disciplina?.id}"
+                    th:data-trimestre="${p.trimestre}"
+                    th:data-tipo="${p.tipoPergunta}"
+                    th:data-enunciado="${#strings.toLowerCase(p.enunciado)}">
+                    <td class="font-mono text-muted" th:text="${p.id}">1</td>
+                    <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                        th:text="${p.enunciado}">Enunciado</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${p.tipoPergunta.name() == 'ESCOLHA_MULTIPLA'} ? 'badge-blue' :
+                                             (${p.tipoPergunta.name() == 'VERDADEIRO_FALSO'} ? 'badge-cyan' :
+                                             (${p.tipoPergunta.name() == 'DESENVOLVIMENTO'} ? 'badge-warn' : 'badge-green'))"
+                              th:text="${p.tipoPergunta.name() == 'ESCOLHA_MULTIPLA'} ? 'Múltipla' :
+                                       (${p.tipoPergunta.name() == 'VERDADEIRO_FALSO'} ? 'V/F' :
+                                       (${p.tipoPergunta.name() == 'DESENVOLVIMENTO'} ? 'Desenv.' : 'Completar'))">
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${p.nivelDificuldade.name() == 'FACIL'} ? 'badge-green' :
+                                             (${p.nivelDificuldade.name() == 'MEDIO'} ? 'badge-warn' : 'badge-red')"
+                              th:text="${p.nivelDificuldade.name() == 'FACIL'} ? 'Fácil' :
+                                       (${p.nivelDificuldade.name() == 'MEDIO'} ? 'Médio' : 'Difícil')">
+                        </span>
+                    </td>
+                    <td th:text="${p.classe?.nome}">10.ª A</td>
+                    <td th:text="${p.disciplina?.nome}">Matemática</td>
+                    <td th:text="${p.trimestre.name() == 'PRIMEIRO'} ? '1.º' :
+                                 (${p.trimestre.name() == 'SEGUNDO'} ? '2.º' : '3.º')">1.º</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-ghost btn-sm btn-icon"
+                                    th:attr="data-id=${p.id}"
+                                    onclick="abrirModalEditar(this)"
+                                    title="Editar">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button class="btn btn-danger btn-sm btn-icon"
+                                    th:onclick="|confirmarDelete(${p.id})|"
+                                    title="Eliminar">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ═══ MODAL PERGUNTA ═══ -->
+<div class="modal-backdrop" id="modal-pergunta">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-title">Nova pergunta</span>
+            <button class="modal-close" onclick="closeModal('modal-pergunta')">✕</button>
+        </div>
+
+        <!-- Enunciado -->
+        <div class="form-group">
+            <label class="form-label">Enunciado <span style="color:var(--danger)">*</span></label>
+            <textarea id="inp-enunciado" class="form-control" placeholder="Escreva o enunciado da pergunta..." rows="3"></textarea>
+        </div>
+
+        <!-- Linha 1: Turma + Disciplina + Tema -->
+        <div class="form-row-3" style="margin-bottom:16px">
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Turma <span style="color:var(--danger)">*</span></label>
+                <select id="inp-classe" class="form-control">
+                    <option value="">Seleccionar...</option>
+                    <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.nome}"></option>
+                </select>
+            </div>
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Disciplina <span style="color:var(--danger)">*</span></label>
+                <select id="inp-disciplina" class="form-control" onchange="filtrarTemas()">
+                    <option value="">Seleccionar...</option>
+                    <option th:each="d : ${disciplinas}" th:value="${d.id}" th:text="${d.nome}"></option>
+                </select>
+            </div>
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Tema <span style="color:var(--danger)">*</span></label>
+                <select id="inp-tema" class="form-control">
+                    <option value="">Seleccionar disciplina primeiro...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Linha 2: Trimestre + Tipo + Nível + Pontuação -->
+        <div class="form-row" style="margin-bottom:16px">
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Trimestre <span style="color:var(--danger)">*</span></label>
+                <select id="inp-trimestre" class="form-control">
+                    <option value="">Seleccionar...</option>
+                    <option value="PRIMEIRO">1.º Trimestre</option>
+                    <option value="SEGUNDO">2.º Trimestre</option>
+                    <option value="TERCEIRO">3.º Trimestre</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Tipo <span style="color:var(--danger)">*</span></label>
+                <select id="inp-tipo" class="form-control" onchange="onTipoChange()">
+                    <option value="">Seleccionar...</option>
+                    <option value="ESCOLHA_MULTIPLA">Escolha Múltipla</option>
+                    <option value="VERDADEIRO_FALSO">Verdadeiro / Falso</option>
+                    <option value="DESENVOLVIMENTO">Desenvolvimento</option>
+                    <option value="COMPLETAR">Completar</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px">
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Nível de dificuldade <span style="color:var(--danger)">*</span></label>
+                <select id="inp-nivel" class="form-control">
+                    <option value="">Seleccionar...</option>
+                    <option value="FACIL">Fácil</option>
+                    <option value="MEDIO">Médio</option>
+                    <option value="DIFICIL">Difícil</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin:0">
+                <label class="form-label">Pontuação</label>
+                <input id="inp-pontuacao" class="form-control" type="number" min="0" step="0.5" placeholder="Ex: 2.5"/>
+            </div>
+        </div>
+
+        <hr class="divider"/>
+
+        <!-- Respostas -->
+        <div id="resp-section" class="resp-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <label class="form-label" style="margin:0">Respostas <span style="color:var(--danger)">*</span></label>
+                <span id="resp-hint" style="font-size:11px;color:var(--muted)"></span>
+            </div>
+            <div class="respostas-container" id="respostas-container"></div>
+            <button class="btn-add-resp" id="btn-add-resp" onclick="addResposta()" style="margin-top:8px">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Adicionar resposta
+            </button>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+            <button class="btn btn-ghost" onclick="closeModal('modal-pergunta')">Cancelar</button>
+            <button class="btn btn-primary" id="btn-salvar" onclick="salvar()">Guardar pergunta</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DELETE -->
+<div class="modal-backdrop" id="modal-delete">
+    <div class="modal" style="max-width:400px">
+        <div class="modal-header">
+            <span class="modal-title">Eliminar pergunta</span>
+            <button class="modal-close" onclick="closeModal('modal-delete')">✕</button>
+        </div>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:20px">
+            Tem a certeza que quer eliminar esta pergunta? Esta acção é irreversível.
+        </p>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button class="btn btn-ghost" onclick="closeModal('modal-delete')">Cancelar</button>
+            <button class="btn btn-danger" onclick="deletar()">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+</th:block>
+
+<th:block layout:fragment="scripts">
+<script th:inline="javascript">
+    // Mapa de temas por disciplina vindo do servidor
+    const temasPorDisciplina = {};
+    /*[[${temas}]]*/ [].forEach(t => {
+        const dId = t.disciplina?.id;
+        if (!dId) return;
+        if (!temasPorDisciplina[dId]) temasPorDisciplina[dId] = [];
+        temasPorDisciplina[dId].push(t);
+    });
+
+    let editId = null;
+
+    /* ── Filtro da tabela ── */
+    function filtrar() {
+        const classe     = document.getElementById('f-classe').value;
+        const disciplina = document.getElementById('f-disciplina').value;
+        const trimestre  = document.getElementById('f-trimestre').value;
+        const tipo       = document.getElementById('f-tipo').value;
+        const busca      = document.getElementById('f-busca').value.toLowerCase().trim();
+
+        document.querySelectorAll('#tbl-body tr[data-enunciado]').forEach(tr => {
+            const ok =
+                (!classe     || tr.dataset.classe     === classe) &&
+                (!disciplina || tr.dataset.disciplina === disciplina) &&
+                (!trimestre  || tr.dataset.trimestre  === trimestre) &&
+                (!tipo       || tr.dataset.tipo       === tipo) &&
+                (!busca      || tr.dataset.enunciado.includes(busca));
+            tr.style.display = ok ? '' : 'none';
+        });
+    }
+
+    /* ── Temas dinâmicos ── */
+    function filtrarTemas(valorActual = null) {
+        const dId = document.getElementById('inp-disciplina').value;
+        const sel = document.getElementById('inp-tema');
+        sel.innerHTML = '<option value="">Seleccionar tema...</option>';
+        (temasPorDisciplina[dId] || []).forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = t.nome;
+            if (valorActual && String(t.id) === String(valorActual)) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+
+    /* ── Tipo de pergunta → respostas ── */
+    function onTipoChange() {
+        const tipo = document.getElementById('inp-tipo').value;
+        const sec  = document.getElementById('resp-section');
+        const cont = document.getElementById('respostas-container');
+        const hint = document.getElementById('resp-hint');
+        const btnAdd = document.getElementById('btn-add-resp');
+
+        cont.innerHTML = '';
+
+        if (!tipo || tipo === 'DESENVOLVIMENTO') {
+            sec.classList.remove('visible');
+            return;
+        }
+
+        sec.classList.add('visible');
+
+        if (tipo === 'VERDADEIRO_FALSO') {
+            hint.textContent = 'Seleccione qual é a correcta';
+            btnAdd.style.display = 'none';
+            addResposta('Verdadeiro', false, true);
+            addResposta('Falso',      false, true);
+        } else {
+            hint.textContent = tipo === 'ESCOLHA_MULTIPLA'
+                ? 'Marque a(s) resposta(s) correcta(s)'
+                : 'Marque a resposta correcta';
+            btnAdd.style.display = 'flex';
+            addResposta();
+            addResposta();
+        }
+    }
+
+    function addResposta(texto = '', correta = false, fixo = false) {
+        const cont = document.getElementById('respostas-container');
+        const tipo = document.getElementById('inp-tipo').value;
+        const isRadio = tipo === 'VERDADEIRO_FALSO' || tipo === 'COMPLETAR';
+
+        const row = document.createElement('div');
+        row.className = 'resposta-row';
+
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.placeholder = 'Texto da resposta...';
+        inp.value = texto;
+        inp.readOnly = fixo;
+        if (fixo) inp.style.opacity = '0.7';
+
+        const label = document.createElement('label');
+        label.className = 'correct-toggle';
+        const chk = document.createElement('input');
+        chk.type = isRadio ? 'radio' : 'checkbox';
+        chk.name = 'resposta-correcta';
+        chk.checked = correta;
+        chk.addEventListener('change', () => {
+            document.querySelectorAll('.correct-toggle').forEach(l => l.classList.remove('is-correct'));
+            if (chk.checked) label.classList.add('is-correct');
+        });
+        if (correta) label.classList.add('is-correct');
+        label.appendChild(chk);
+        label.append(' Correcta');
+
+        row.appendChild(inp);
+        row.appendChild(label);
+
+        if (!fixo) {
+            const btnDel = document.createElement('button');
+            btnDel.className = 'btn btn-ghost btn-sm btn-icon';
+            btnDel.title = 'Remover';
+            btnDel.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+            btnDel.onclick = () => row.remove();
+            row.appendChild(btnDel);
+        }
+
+        cont.appendChild(row);
+    }
+
+    /* ── Modal nova ── */
+    function abrirModalNova() {
+        editId = null;
+        document.getElementById('modal-title').textContent = 'Nova pergunta';
+        ['inp-enunciado','inp-pontuacao'].forEach(id => document.getElementById(id).value = '');
+        ['inp-classe','inp-disciplina','inp-tema','inp-trimestre','inp-tipo','inp-nivel'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        document.getElementById('resp-section').classList.remove('visible');
+        document.getElementById('respostas-container').innerHTML = '';
+        openModal('modal-pergunta');
+    }
+
+    /* ── Modal editar (carrega via API) ── */
+    async function abrirModalEditar(btn) {
+        const id = btn.dataset.id;
+        editId = id;
+
+        try {
+            const res = await fetch(`/pergunta/${id}`);
+            const p   = await res.json();
+
+            document.getElementById('modal-title').textContent = 'Editar pergunta';
+            document.getElementById('inp-enunciado').value  = p.enunciado || '';
+            document.getElementById('inp-pontuacao').value  = p.pontuacao || '';
+            document.getElementById('inp-classe').value     = p.classe?.id || '';
+            document.getElementById('inp-disciplina').value = p.disciplina?.id || '';
+            document.getElementById('inp-trimestre').value  = p.trimestre || '';
+            document.getElementById('inp-tipo').value       = p.tipoPergunta || '';
+            document.getElementById('inp-nivel').value      = p.nivelDificuldade || '';
+
+            filtrarTemas(p.tema?.id);
+            onTipoChange();
+
+            // Carregar respostas existentes
+            if (p.respostas?.length && p.tipoPergunta !== 'DESENVOLVIMENTO') {
+                const cont = document.getElementById('respostas-container');
+                cont.innerHTML = '';
+                const isVF = p.tipoPergunta === 'VERDADEIRO_FALSO';
+                p.respostas.forEach(r => addResposta(r.texto, r.correta, isVF));
+            }
+
+            openModal('modal-pergunta');
+        } catch (e) {
+            showToast('Erro ao carregar pergunta.', 'error');
+        }
+    }
+
+    /* ── Salvar ── */
+    async function salvar() {
+        const enunciado    = document.getElementById('inp-enunciado').value.trim();
+        const classeId     = document.getElementById('inp-classe').value;
+        const disciplinaId = document.getElementById('inp-disciplina').value;
+        const temaId       = document.getElementById('inp-tema').value;
+        const trimestre    = document.getElementById('inp-trimestre').value;
+        const tipo         = document.getElementById('inp-tipo').value;
+        const nivel        = document.getElementById('inp-nivel').value;
+        const pontuacao    = document.getElementById('inp-pontuacao').value;
+
+        if (!enunciado)    { showToast('Enunciado é obrigatório.', 'error'); return; }
+        if (!classeId)     { showToast('Seleccione a turma.', 'error'); return; }
+        if (!disciplinaId) { showToast('Seleccione a disciplina.', 'error'); return; }
+        if (!temaId)       { showToast('Seleccione o tema.', 'error'); return; }
+        if (!trimestre)    { showToast('Seleccione o trimestre.', 'error'); return; }
+        if (!tipo)         { showToast('Seleccione o tipo de pergunta.', 'error'); return; }
+        if (!nivel)        { showToast('Seleccione o nível de dificuldade.', 'error'); return; }
+
+        // Coletar respostas
+        const respostas = [];
+        if (tipo !== 'DESENVOLVIMENTO') {
+            document.querySelectorAll('.resposta-row').forEach(row => {
+                const texto  = row.querySelector('input[type="text"]').value.trim();
+                const correta = row.querySelector('input[type="checkbox"],input[type="radio"]').checked;
+                if (texto) respostas.push({ texto, correta });
+            });
+
+            if (respostas.length === 0) {
+                showToast('Adicione pelo menos uma resposta.', 'error'); return;
+            }
+            if (!respostas.some(r => r.correta)) {
+                showToast('Marque pelo menos uma resposta correcta.', 'error'); return;
+            }
+            if (tipo === 'VERDADEIRO_FALSO' && respostas.length !== 2) {
+                showToast('Verdadeiro/Falso deve ter exactamente 2 respostas.', 'error'); return;
+            }
+        }
+
+        const payload = {
+            enunciado,
+            classe:          { id: parseInt(classeId) },
+            disciplina:      { id: parseInt(disciplinaId) },
+            tema:            { id: parseInt(temaId) },
+            trimestre,
+            tipoPergunta:    tipo,
+            nivelDificuldade: nivel,
+            pontuacao:       pontuacao ? parseFloat(pontuacao) : null,
+            respostas
+        };
+
+        const btn = document.getElementById('btn-salvar');
+        btn.disabled = true;
+
+        try {
+            const url    = editId ? `/pergunta/${editId}` : '/pergunta';
+            const method = editId ? 'PUT' : 'POST';
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err || 'Erro ao guardar.');
+            }
+            closeModal('modal-pergunta');
+            showToast(editId ? 'Pergunta actualizada.' : 'Pergunta criada.');
+            setTimeout(() => location.reload(), 800);
+        } catch (e) {
+            showToast(e.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    let deleteId = null;
+    function confirmarDelete(id) {
+        deleteId = id;
+        openModal('modal-delete');
+    }
+
+    async function deletar() {
+        try {
+            const res = await fetch(`/pergunta/${deleteId}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Erro ao eliminar.');
+            closeModal('modal-delete');
+            showToast('Pergunta eliminada.');
+            setTimeout(() => location.reload(), 800);
+        } catch (e) {
+            showToast(e.message, 'error');
+        }
+    }
+</script>
+</th:block>
+</html>
