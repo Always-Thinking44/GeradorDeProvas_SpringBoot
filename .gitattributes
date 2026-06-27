@@ -1,2 +1,12 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+# Templates Thymeleaf - não contar como linguagem principal
+src/main/resources/templates/**   linguist-detectable=false
+
+# Ficheiros estáticos
+src/main/resources/static/**      linguist-detectable=false
+
+# Ficheiros de configuração (opcional, já são excluídos por padrão)
+*.xml    linguist-detectable=false
+*.yml    linguist-detectable=false
+*.properties linguist-detectable=false
