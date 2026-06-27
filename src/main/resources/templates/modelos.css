@@ -1,0 +1,28 @@
+.secao-row {
+    background: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 80px 36px;
+    gap: 10px;
+    align-items: end;
+}
+.secao-row .form-group { margin: 0; }
+.btn-add-secao {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+    margin-top: 4px;
+}
+.btn-add-secao:hover { border-color: var(--blue); color: var(--blue-l); }
