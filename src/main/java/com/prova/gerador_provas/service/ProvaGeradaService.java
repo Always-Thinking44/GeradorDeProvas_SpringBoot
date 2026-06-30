@@ -47,9 +47,9 @@ public class ProvaGeradaService {
                             .findRandomQuestions(
                                     classId,
                                     subjectId,
-                                    trimestre,
-                                    secao.getTipoPergunta(),
-                                    secao.getNivelDificuldade());
+                                    trimestre.name(),
+                                    secao.getTipoPergunta().name(),
+                                    secao.getNivelDificuldade().name());
 
             Collections.shuffle(perguntas);
 

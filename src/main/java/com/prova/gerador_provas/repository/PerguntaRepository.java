@@ -5,6 +5,7 @@ import com.prova.gerador_provas.enums.TipoPergunta;
 import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.Pergunta;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -20,35 +21,46 @@ public interface PerguntaRepository extends JpaRepository<Pergunta, Long> {
 
     List<Pergunta> findByTemaId(Long temaId);
 
-    List<Pergunta> findByTipoPerguntaId(Long tipoPerguntaId);
+    List<Pergunta> findByTipoPergunta(TipoPergunta tipoPerguntaId);
 
-    List<Pergunta> findByNivelDificuldadeId(Long nivelDificuldadeId);
+    List<Pergunta> findByNivelDificuldadeId(NivelDificuldade nivelDificuldadeId);
 
-    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreId(
+    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestre(
             Long classeId,
             Long disciplinaId,
             Long trimestreId
     );
 
-    List <Pergunta> findRandomQuestions(
-            Long classId,
-            Long subjectId,
-            Trimestre trimestre,
-            TipoPergunta getTipoPergunta,
-            NivelDificuldade getNivelDificuldade);
+    @Query(value = """
+    SELECT * FROM perguntas
+    WHERE classe_id = :classeId
+      AND disciplina_id = :disciplinaId
+      AND trimestre = :trimestre
+      AND tipo_pergunta = :tipo
+      AND nivel_dificuldade = :nivel
+    ORDER BY RAND()
+    LIMIT :limit
+""", nativeQuery = true)
+    List<Pergunta> findRandomQuestions(
+            Long classeId,
+            Long disciplinaId,
+            String trimestre,
+            String tipo,
+            String nivel
+    );
 
-    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreAndTipoPerguntaId(
+    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreAndTipoPergunta(
             Long classeId,
             Long disciplinaId,
             Trimestre trimestreId,
-            Long tipoPerguntaId
+            TipoPergunta tipoPerguntaId
     );
 
-    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreAndTipoPerguntaIdAndNivelDificuldadeId(
+    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreAndTipoPerguntaAndNivelDificuldade(
             Long classeId,
             Long disciplinaId,
-            Long trimestreId,
-            Long tipoPerguntaId,
-            Long nivelDificuldadeId
+            Trimestre trimestreId,
+            TipoPergunta tipoPerguntaId,
+            NivelDificuldade nivelDificuldadeId
     );
 }
