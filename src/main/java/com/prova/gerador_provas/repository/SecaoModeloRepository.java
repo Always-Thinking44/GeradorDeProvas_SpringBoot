@@ -1,5 +1,7 @@
 package com.prova.gerador_provas.repository;
 
+import com.prova.gerador_provas.enums.NivelDificuldade;
+import com.prova.gerador_provas.enums.TipoPergunta;
 import com.prova.gerador_provas.model.SecaoModelo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,12 +15,12 @@ public interface SecaoModeloRepository
     List<SecaoModelo>
     findByModeloProvaIdAndTipoPerguntaId(
             Long modeloProvaId,
-            Long tipoPerguntaId
+            TipoPergunta tipoPerguntaId
     );
 
     List<SecaoModelo>
     findByModeloProvaIdAndNivelDificuldadeId(
             Long modeloProvaId,
-            Long nivelDificuldadeId
+            NivelDificuldade nivelDificuldadeId
     );
 }

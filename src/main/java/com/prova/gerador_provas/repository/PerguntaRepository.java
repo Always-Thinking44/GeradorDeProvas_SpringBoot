@@ -23,12 +23,12 @@ public interface PerguntaRepository extends JpaRepository<Pergunta, Long> {
 
     List<Pergunta> findByTipoPergunta(TipoPergunta tipoPerguntaId);
 
-    List<Pergunta> findByNivelDificuldadeId(NivelDificuldade nivelDificuldadeId);
+    List<Pergunta> findByNivelDificuldade(NivelDificuldade nivelDificuldadeId);
 
     List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestre(
             Long classeId,
             Long disciplinaId,
-            Long trimestreId
+            Trimestre trimestreId
     );
 
     @Query(value = """

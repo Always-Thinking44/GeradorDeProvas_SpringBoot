@@ -1,5 +1,6 @@
 package com.prova.gerador_provas.repository;
 
+import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.ProvaGerada;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,12 +16,12 @@ public interface ProvaGeradaRepository
 
     List<ProvaGerada> findByDisciplinaId(Long disciplinaId);
 
-    List<ProvaGerada> findByTrimestreId(Long trimestreId);
+    List<ProvaGerada> findByTrimestre(Long trimestreId);
 
     List<ProvaGerada>
-    findByClasseIdAndDisciplinaIdAndTrimestreId(
+    findByClasseIdAndDisciplinaIdAndTrimestre(
             Long classeId,
             Long disciplinaId,
-            Long trimestreId
+            Trimestre trimestreId
     );
 }

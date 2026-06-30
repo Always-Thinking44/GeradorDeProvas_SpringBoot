@@ -1,5 +1,6 @@
 package com.prova.gerador_provas.repository;
 
+import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.Tema;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,12 +11,12 @@ public interface TemaRepository
 
     List<Tema> findByDisciplinaId(Long disciplinaId);
 
-    List<Tema> findByTrimestreId(Long trimestreId);
+    List<Tema> findByTrimestre(Trimestre trimestreId);
 
     List<Tema>
-    findByDisciplinaIdAndTrimestreId(
+    findByDisciplinaIdAndTrimestre(
             Long disciplinaId,
-            Long trimestreId
+            Trimestre trimestreId
     );
 
     boolean existsByNomeIgnoreCaseAndDisciplinaId(
