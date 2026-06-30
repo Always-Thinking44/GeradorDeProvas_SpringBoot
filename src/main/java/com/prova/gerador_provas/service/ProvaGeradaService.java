@@ -1,5 +1,6 @@
 package com.prova.gerador_provas.service;
 
+import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.*;
 import com.prova.gerador_provas.repository.ModeloProvaRepository;
 import com.prova.gerador_provas.repository.PerguntaRepository;
@@ -25,7 +26,7 @@ public class ProvaGeradaService {
     public ProvaGerada generateExam(
             Long classId,
             Long subjectId,
-            Long trimestre) {
+            Trimestre trimestre) {
 
         ModeloProva modelo =
                 modeloRepository

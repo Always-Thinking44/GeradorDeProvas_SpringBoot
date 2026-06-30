@@ -2,6 +2,7 @@ package com.prova.gerador_provas.repository;
 
 import com.prova.gerador_provas.enums.NivelDificuldade;
 import com.prova.gerador_provas.enums.TipoPergunta;
+import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.Pergunta;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,7 +16,7 @@ public interface PerguntaRepository extends JpaRepository<Pergunta, Long> {
 
     List<Pergunta> findByDisciplinaId(Long disciplinaId);
 
-    List<Pergunta> findByTrimestreId(Long trimestreId);
+    List<Pergunta> findByTrimestre(Trimestre trimestre);
 
     List<Pergunta> findByTemaId(Long temaId);
 
@@ -32,18 +33,18 @@ public interface PerguntaRepository extends JpaRepository<Pergunta, Long> {
     List <Pergunta> findRandomQuestions(
             Long classId,
             Long subjectId,
-            Long trimestre,
+            Trimestre trimestre,
             TipoPergunta getTipoPergunta,
             NivelDificuldade getNivelDificuldade);
 
-    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreIdAndTipoPerguntaId(
+    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreAndTipoPerguntaId(
             Long classeId,
             Long disciplinaId,
-            Long trimestreId,
+            Trimestre trimestreId,
             Long tipoPerguntaId
     );
 
-    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreIdAndTipoPerguntaIdAndNivelDificuldadeId(
+    List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreAndTipoPerguntaIdAndNivelDificuldadeId(
             Long classeId,
             Long disciplinaId,
             Long trimestreId,

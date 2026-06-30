@@ -1,5 +1,6 @@
 package com.prova.gerador_provas.controller;
 
+import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.ProvaGerada;
 import com.prova.gerador_provas.service.ProvaGeradaService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class ProvaGeradaController {
     public ProvaGerada generateExam(
             @RequestParam Long classId,
             @RequestParam Long subjectId,
-            @RequestParam Long termId) {
+            @RequestParam Trimestre termId) {
 
         return provaGeradaService.generateExam(
                 classId,

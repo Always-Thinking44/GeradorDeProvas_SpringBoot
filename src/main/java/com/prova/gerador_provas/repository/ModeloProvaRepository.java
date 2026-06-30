@@ -1,5 +1,6 @@
 package com.prova.gerador_provas.repository;
 
+import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.ModeloProva;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,19 +16,19 @@ public interface ModeloProvaRepository
 
     List<ModeloProva> findByDisciplinaId(Long disciplinaId);
 
-    List<ModeloProva> findByTrimestreId(Long trimestreId);
+    List<ModeloProva> findByTrimestre(Trimestre trimestre);
 
     Optional<ModeloProva>
     findByClasseIdAndDisciplinaIdAndTrimestre(
             Long classeId,
             Long disciplinaId,
-            Long trimestreId
+            Trimestre trimestreId
     );
 
     Optional<ModeloProva>
-    findByClasseIdAndDisciplinaIdAndTrimestreIdAndAtivoTrue(
+    findByClasseIdAndDisciplinaIdAndTrimestreAndAtivoTrue(
             Long classeId,
             Long disciplinaId,
-            Long trimestreId
+            Trimestre trimestreId
     );
 }
