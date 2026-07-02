@@ -7,8 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@Controller
-@RequestMapping("/pergunta")
+@RestController
+@RequestMapping("/api/pergunta")
 @RequiredArgsConstructor
 
 public class PerguntaController {

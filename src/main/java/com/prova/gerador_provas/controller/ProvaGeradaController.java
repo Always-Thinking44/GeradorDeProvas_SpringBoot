@@ -8,8 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@Controller
-@RequestMapping("/prova_gerada")
+@RestController
+@RequestMapping("/api/prova_gerada")
 @RequiredArgsConstructor
 
 public class ProvaGeradaController {

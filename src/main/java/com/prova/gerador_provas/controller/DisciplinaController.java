@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
-@Controller
-@RequestMapping("/disciplinas")
+@RestController
+@RequestMapping("/api/disciplinas")
 @RequiredArgsConstructor
 public class DisciplinaController {
 
@@ -26,8 +26,9 @@ public class DisciplinaController {
     }
 
     @PostMapping
-    public Disciplina createSubject(@RequestBody Disciplina disciplina) {
-        return disciplinaService.save(disciplina);
+    public String createSubject(@ModelAttribute Disciplina disciplina) {
+        disciplinaService.save(disciplina);
+        return "redirect:/";
     }
 
     @PutMapping("/{id}")

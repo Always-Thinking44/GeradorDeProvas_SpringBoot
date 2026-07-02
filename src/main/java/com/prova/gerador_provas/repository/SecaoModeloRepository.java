@@ -13,14 +13,14 @@ public interface SecaoModeloRepository
     List<SecaoModelo> findByModeloProvaId(Long modeloProvaId);
 
     List<SecaoModelo>
-    findByModeloProvaIdAndTipoPerguntaId(
+    findByModeloProvaIdAndTipoPergunta(
             Long modeloProvaId,
             TipoPergunta tipoPerguntaId
     );
 
     List<SecaoModelo>
-    findByModeloProvaIdAndNivelDificuldadeId(
+    findByModeloProvaIdAndNivelDificuldade(
             Long modeloProvaId,
-            NivelDificuldade nivelDificuldadeId
+            NivelDificuldade nivelDificuldade
     );
 }

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@Controller
-@RequestMapping("/temas")
+@RestController
+@RequestMapping("/api/temas")
 @RequiredArgsConstructor
 public class TemaController {
 
@@ -25,7 +25,7 @@ public class TemaController {
     }
 
     @PostMapping
-    public Tema createTheme(@RequestBody Tema tema) {
+    public Tema createTheme(Tema tema) {
         return temaService.save(tema);
     }
 

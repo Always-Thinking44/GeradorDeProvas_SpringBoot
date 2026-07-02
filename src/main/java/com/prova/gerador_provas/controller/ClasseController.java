@@ -7,8 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@Controller
-@RequestMapping("/classe")
+@RestController
+@RequestMapping("/api/classe")
 @RequiredArgsConstructor
 public class ClasseController {
 
@@ -25,13 +25,14 @@ public class ClasseController {
     }
 
     @PostMapping
-    public Classe createClass(@RequestBody Classe classe) {
-        return classeService.save(classe);
+    public String createClass(@ModelAttribute Classe classe) {
+        classeService.save(classe);
+        return "redirect:/";
     }
 
     @PutMapping("/{id}")
     public Classe updateClass(@PathVariable Long id,
-                              @RequestBody Classe classe) {
+                              @ModelAttribute Classe classe) {
         return classeService.update(id, classe);
     }
 
