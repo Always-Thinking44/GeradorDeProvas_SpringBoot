@@ -3,7 +3,8 @@ package com.prova.gerador_provas.controller;
 import com.prova.gerador_provas.model.Classe;
 import com.prova.gerador_provas.service.ClasseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -25,14 +26,14 @@ public class ClasseController {
     }
 
     @PostMapping
-    public String createClass(@ModelAttribute Classe classe) {
-        classeService.save(classe);
-        return "redirect:/";
+    public ResponseEntity<Classe> createClass(@RequestBody Classe classe) {
+        Classe salva = classeService.save(classe);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
     @PutMapping("/{id}")
     public Classe updateClass(@PathVariable Long id,
-                              @ModelAttribute Classe classe) {
+                              @RequestBody Classe classe) {
         return classeService.update(id, classe);
     }
 

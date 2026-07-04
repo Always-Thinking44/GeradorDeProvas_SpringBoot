@@ -3,7 +3,8 @@ package com.prova.gerador_provas.controller;
 import com.prova.gerador_provas.model.Disciplina;
 import com.prova.gerador_provas.service.DisciplinaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -26,9 +27,9 @@ public class DisciplinaController {
     }
 
     @PostMapping
-    public String createSubject(@ModelAttribute Disciplina disciplina) {
-        disciplinaService.save(disciplina);
-        return "redirect:/";
+    public ResponseEntity<Disciplina> createSubject(@RequestBody Disciplina disciplina) {
+        Disciplina salva = disciplinaService.save(disciplina);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
     @PutMapping("/{id}")
