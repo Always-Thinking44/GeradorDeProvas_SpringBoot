@@ -1,5 +1,6 @@
 package com.prova.gerador_provas.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,7 +10,7 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "disciplinas")
+@Table(name = "disciplina")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,12 +27,15 @@ public class Disciplina {
     private String nome;
 
     @OneToMany(mappedBy = "disciplina")
+    @JsonIgnore
     private List<ClasseDisciplina> classeDisciplinas;
 
     @OneToMany(mappedBy = "disciplina")
+    @JsonIgnore
     private List<Tema> temas;
 
     @OneToMany(mappedBy = "disciplina")
+    @JsonIgnore
     private List<Pergunta> perguntas;
 
     @OneToMany(mappedBy = "disciplina")

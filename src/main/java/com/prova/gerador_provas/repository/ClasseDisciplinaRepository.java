@@ -4,6 +4,7 @@ import com.prova.gerador_provas.model.ClasseDisciplina;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ClasseDisciplinaRepository
         extends JpaRepository<ClasseDisciplina, Long> {
@@ -16,4 +17,6 @@ public interface ClasseDisciplinaRepository
             Long classeId,
             Long disciplinaId
     );
+
+    Optional<Object> findByClasseIdAndDisciplinaId(Long classeId, Long disciplinaId);
 }

@@ -36,6 +36,16 @@ public class DisciplinaService {
         return repository.save(existing);
     }
 
+    public Disciplina findOrCreateByNome(String nome) {
+        String nomeTrim = nome.trim();
+        return repository.findByNomeIgnoreCase(nomeTrim)
+                .orElseGet(() -> {
+                    Disciplina nova = new Disciplina();
+                    nova.setNome(nomeTrim);
+                    return repository.save(nova);
+                });
+    }
+
     public void delete(Long id) {
         repository.delete(findById(id));
     }

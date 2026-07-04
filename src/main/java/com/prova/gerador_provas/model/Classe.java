@@ -4,9 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.*;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "classes")
+@Table(name = "classe")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,12 +23,15 @@ public class Classe{
     @Column(nullable = false, unique = true)
     private String nome;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "classe")
     private List<ClasseDisciplina> classeDisciplinas;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "classe")
     private List<Pergunta> perguntas;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "classe")
     private List<ModeloProva> modelosProva;
 }

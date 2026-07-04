@@ -146,28 +146,28 @@ const Api = {
         return request(`/api/classe/${id}`, { method: 'DELETE' });
     },
 
-    /* ---- Disciplina: /api/disciplinas ----
-     * OBS: o backend hoje NÃO filtra disciplinas por classe (GET retorna
-     * todas). O filtro por classeId abaixo é feito no cliente, assumindo
-     * que a entidade Disciplina tem um campo `classe` (disciplina.classe.id).
-     * Se a sua entidade Disciplina não tiver esse relacionamento, esse
-     * filtro vai silenciosamente não funcionar (todas as disciplinas vão
-     * aparecer em todas as classes) — confirme o model antes de assumir
-     * que está tudo certo.
+    /* ---- Disciplina vinculada a uma Classe: /api/classes/{classeId}/disciplinas ----
+     * Disciplina é uma entidade global (nome único no sistema); o vínculo
+     * com a classe é feito via ClasseDisciplina no backend. Estes endpoints
+     * já retornam/recebem só o que importa pra tela da classe.
      */
-    async listarDisciplinas(classeId) {
-        const todas = await request('/api/disciplinas');
-        if (!classeId) return todas;
-        return todas.filter(d => String(d.classe?.id) === String(classeId));
+    listarDisciplinas(classeId) {
+        return request(`/api/classes/${classeId}/disciplinas`);
     },
     criarDisciplina({ nome, classeId }) {
-        return request('/api/disciplinas', {
+        return request(`/api/classes/${classeId}/disciplinas`, {
             method: 'POST',
-            body: JSON.stringify({ nome, classe: { id: Number(classeId) } }),
+            body: JSON.stringify({ nome }),
         });
     },
-    removerDisciplina(id) {
-        return request(`/api/disciplinas/${id}`, { method: 'DELETE' });
+    removerDisciplina(classeId, disciplinaId) {
+        return request(`/api/classes/${classeId}/disciplinas/${disciplinaId}`, { method: 'DELETE' });
+    },
+
+    /* ---- Disciplina (CRUD global, usado em telas fora do contexto de uma
+     * classe específica, ex: /disciplinas, /temas) ---- */
+    listarTodasDisciplinas() {
+        return request('/api/disciplinas');
     },
 
     /* ---- Tema: /api/temas ---- */
