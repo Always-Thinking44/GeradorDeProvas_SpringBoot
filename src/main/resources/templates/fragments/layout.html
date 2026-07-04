@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Fragmento reaproveitável: sidebar + topbar + modal "Nova Classe" -->
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR
+     ============================================================ -->
+<aside class="sidebar" th:fragment="sidebar">
+    <div class="sidebar__brand">
+        <span class="dot"></span> Gerador de Provas
+    </div>
+
+    <nav>
+        <div class="sidebar__section-title">Geral</div>
+        <a class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active'"
+           href="/static"><span class="icon">📊</span> Dashboard</a>
+
+        <div class="sidebar__section-title">Classes</div>
+        <ul id="classesList">
+            <!-- preenchido dinamicamente via JS (carregarSidebarClasses) -->
+            <li data-empty style="padding:8px 12px;color:#9ca3af;font-size:.8rem">Carregando...</li>
+        </ul>
+        <button type="button" class="sidebar__new-class-btn" onclick="openModal('modalNovaClasse')">
+            <span>＋</span> Nova classe
+        </button>
+
+        <div class="sidebar__section-title">Outros</div>
+        <a class="nav-link" th:classappend="${activePage == 'modelos'} ? 'active'"
+           href="/modelos"><span class="icon">🧩</span> Modelos de prova</a>
+        <a class="nav-link" th:classappend="${activePage == 'provas'} ? 'active'"
+           href="/provas"><span class="icon">📝</span> Provas geradas</a>
+    </nav>
+</aside>
+
+<!-- ============================================================
+     TOPBAR
+     ============================================================ -->
+<header class="topbar" th:fragment="topbar(titulo, subtitulo)">
+    <div>
+        <button id="mobileMenuBtn" class="btn btn-outline btn-sm" style="display:none">☰</button>
+        <h1 th:text="${titulo}">Título</h1>
+        <div class="subtitle" th:text="${subtitulo}">Subtítulo</div>
+    </div>
+</header>
+
+<!-- ============================================================
+     MODAL: Nova Classe (global, disponível em qualquer página)
+     ============================================================ -->
+<div th:fragment="modalNovaClasse" class="modal-overlay" id="modalNovaClasse">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Nova classe</h3>
+            <button class="modal__close" onclick="closeModal('modalNovaClasse')">&times;</button>
+        </div>
+        <form id="formNovaClasse">
+            <div class="modal__body">
+                <div class="form-group">
+                    <label for="novaClasseNome">Nome da classe</label>
+                    <input type="text" id="novaClasseNome" name="nome" placeholder="Ex: 10ª Classe" autocomplete="off" required>
+                    <div class="form-error" id="novaClasseErro"></div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalNovaClasse')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar classe</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+     TOAST CONTAINER
+     ============================================================ -->
+<div th:fragment="toastContainer" id="toastContainer"></div>
+
+<!-- ============================================================
+     SCRIPTS COMUNS
+     ============================================================ -->
+<th:block th:fragment="scriptsComuns">
+    <script th:src="@{/js/api.js}"></script>
+</th:block>
+
+</body>
+</html>

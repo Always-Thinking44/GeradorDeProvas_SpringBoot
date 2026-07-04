@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${classe.nome} + ' · Gerador de Provas'">Classe</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body th:attr="data-classe-id=${classe.id}">
+
+<script th:inline="javascript">
+    // usado pelo api.js para destacar a classe ativa na sidebar
+    window.CURRENT_CLASSE_ID = /*[[${classe.id}]]*/ null;
+</script>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar(${classe.nome}, 'Disciplinas, perguntas e provas desta classe')}"></div>
+
+    <div class="content">
+
+        <!-- ===== DISCIPLINAS ===== -->
+        <div class="card">
+            <div class="card__header">
+                <h2>Disciplinas</h2>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modalNovaDisciplina')">
+                    ＋ Nova disciplina
+                </button>
+            </div>
+
+            <div id="disciplinasTabs" class="tabs">
+                <!-- preenchido via JS: uma "pill" por disciplina + "Todas" -->
+                <span style="color:var(--text-muted);font-size:.85rem">Carregando disciplinas...</span>
+            </div>
+            <div id="disciplinasEmpty" class="empty-state" style="display:none">
+                <div class="emoji">📚</div>
+                Nenhuma disciplina cadastrada nesta classe ainda.<br>
+                Cadastre a primeira disciplina para poder criar perguntas.
+            </div>
+        </div>
+
+        <!-- ===== PERGUNTAS ===== -->
+        <div class="card">
+            <div class="card__header">
+                <h2>Perguntas</h2>
+                <div style="display:flex;gap:10px">
+                    <button class="btn btn-outline btn-sm" id="btnGerarProva" disabled>
+                        🧾 Gerar prova
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="btnNovaPergunta" disabled>
+                        ＋ Nova pergunta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-bar">
+                <div class="filter-field">
+                    <label for="filtroDisciplina">Disciplina</label>
+                    <select id="filtroDisciplina">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="filtroTrimestre">Trimestre</label>
+                    <select id="filtroTrimestre">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <button class="btn btn-outline btn-sm" id="btnLimparFiltros">Limpar filtros</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Enunciado</th>
+                            <th>Disciplina</th>
+                            <th>Trimestre</th>
+                            <th>Dificuldade</th>
+                            <th>Tipo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="perguntasTableBody">
+                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="perguntasEmpty" class="empty-state" style="display:none">
+                <div class="emoji">❓</div>
+                Nenhuma pergunta encontrada para os filtros selecionados.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Nova Disciplina
+     ============================================================ -->
+<div class="modal-overlay" id="modalNovaDisciplina">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Nova disciplina</h3>
+            <button class="modal__close" onclick="closeModal('modalNovaDisciplina')">&times;</button>
+        </div>
+        <form id="formNovaDisciplina">
+            <div class="modal__body">
+                <div class="form-group">
+                    <label>Classe</label>
+                    <input type="text" th:value="${classe.nome}" disabled>
+                    <div class="hint">A disciplina será cadastrada nesta classe.</div>
+                </div>
+                <div class="form-group">
+                    <label for="novaDisciplinaNome">Nome da disciplina</label>
+                    <input type="text" id="novaDisciplinaNome" placeholder="Ex: Matemática" required>
+                    <div class="form-error" id="novaDisciplinaErro"></div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalNovaDisciplina')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar disciplina</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Nova Pergunta
+     ============================================================ -->
+<div class="modal-overlay" id="modalNovaPergunta">
+    <div class="modal modal-lg">
+        <div class="modal__header">
+            <h3>Nova pergunta</h3>
+            <button class="modal__close" onclick="closeModal('modalNovaPergunta')">&times;</button>
+        </div>
+        <form id="formNovaPergunta">
+            <div class="modal__body">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="perguntaDisciplina">Disciplina</label>
+                        <select id="perguntaDisciplina" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="perguntaTrimestre">Trimestre</label>
+                        <select id="perguntaTrimestre" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="perguntaNivel">Nível de dificuldade</label>
+                        <select id="perguntaNivel" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="perguntaTipo">Tipo de pergunta</label>
+                        <select id="perguntaTipo" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="perguntaTema">Tema <span class="hint">— escolha a disciplina primeiro</span></label>
+                    <div style="display:flex;gap:8px">
+                        <select id="perguntaTema" required disabled style="flex:1">
+                            <option value="">Selecione a disciplina...</option>
+                        </select>
+                        <button type="button" class="btn btn-outline btn-sm" id="btnNovoTema" disabled>＋ Novo tema</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="perguntaEnunciado">Enunciado</label>
+                    <textarea id="perguntaEnunciado" placeholder="Digite o enunciado da pergunta..." required></textarea>
+                </div>
+
+                <hr class="section-divider">
+
+                <div id="respostasSection">
+                    <div class="form-group">
+                        <label>Respostas <span class="hint">— marque a(s) correta(s)</span></label>
+                        <div id="respostasList"></div>
+                        <button type="button" class="btn btn-outline btn-sm" id="btnAddResposta">＋ Adicionar resposta</button>
+                    </div>
+                </div>
+                <div id="respostasDesenvolvimentoMsg" class="empty-state" style="display:none;padding:16px">
+                    Perguntas de desenvolvimento não possuem alternativas — a resposta será avaliada manualmente.
+                </div>
+
+                <div class="form-error" id="novaPerguntaErro"></div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalNovaPergunta')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar pergunta</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Novo Tema (rápido, chamado de dentro do modal de Nova Pergunta)
+     ============================================================ -->
+<div class="modal-overlay" id="modalNovoTema">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Novo tema</h3>
+            <button class="modal__close" onclick="closeModal('modalNovoTema')">&times;</button>
+        </div>
+        <form id="formNovoTema">
+            <div class="modal__body">
+                <div class="form-group">
+                    <label>Disciplina</label>
+                    <input type="text" id="novoTemaDisciplinaNome" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="novoTemaNome">Nome do tema</label>
+                    <input type="text" id="novoTemaNome" placeholder="Ex: Frações" required>
+                    <div class="form-error" id="novoTemaErro"></div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalNovoTema')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar tema</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Gerar Prova
+     ============================================================ -->
+<div class="modal-overlay" id="modalGerarProva">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Gerar prova</h3>
+            <button class="modal__close" onclick="closeModal('modalGerarProva')">&times;</button>
+        </div>
+        <form id="formGerarProva">
+            <div class="modal__body">
+                <p style="color:var(--text-muted);margin-top:0">
+                    Selecione a disciplina e o trimestre para gerar a prova a partir do
+                    modelo cadastrado.
+                </p>
+                <div class="form-group">
+                    <label for="gerarProvaDisciplina">Disciplina</label>
+                    <select id="gerarProvaDisciplina" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gerarProvaTrimestre">Trimestre</label>
+                    <select id="gerarProvaTrimestre" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-error" id="gerarProvaErro"></div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalGerarProva')">Cancelar</button>
+                <button type="submit" class="btn btn-success">Gerar prova</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
+<div th:replace="~{fragments/layout :: toastContainer}"></div>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+<script th:src="@{/js/classe-view.js}"></script>
+
+</body>
+</html>
