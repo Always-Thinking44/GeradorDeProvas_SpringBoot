@@ -1,4 +1,5 @@
 package com.prova.gerador_provas.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Resposta {
 
     private Boolean correta;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "pergunta_id")
     private Pergunta pergunta;
