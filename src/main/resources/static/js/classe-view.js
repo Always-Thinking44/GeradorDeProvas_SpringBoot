@@ -14,37 +14,42 @@ let respostaIdCounter = 0;
  * Inicialização
  * ---------------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
-  preencherSelectsEnum();
-  await carregarDisciplinas();
-  await carregarTemas();
-  await carregarPerguntas();
+  try {
+    preencherSelectsEnum();
+    await carregarDisciplinas();
+    await carregarTemas();
+    await carregarPerguntas();
 
-  document.getElementById('formNovaDisciplina').addEventListener('submit', onSubmitNovaDisciplina);
-  document.getElementById('formNovaPergunta').addEventListener('submit', onSubmitNovaPergunta);
-  document.getElementById('formNovoTema').addEventListener('submit', onSubmitNovoTema);
-  document.getElementById('formGerarProva').addEventListener('submit', onSubmitGerarProva);
+    document.getElementById('formNovaDisciplina').addEventListener('submit', onSubmitNovaDisciplina);
+    document.getElementById('formNovaPergunta').addEventListener('submit', onSubmitNovaPergunta);
+    document.getElementById('formNovoTema').addEventListener('submit', onSubmitNovoTema);
+    document.getElementById('formGerarProva').addEventListener('submit', onSubmitGerarProva);
 
-  document.getElementById('perguntaDisciplina').addEventListener('change', onPerguntaDisciplinaChange);
-  document.getElementById('btnNovoTema').addEventListener('click', abrirModalNovoTema);
+    document.getElementById('perguntaDisciplina').addEventListener('change', onPerguntaDisciplinaChange);
+    document.getElementById('btnNovoTema').addEventListener('click', abrirModalNovoTema);
 
-  document.getElementById('filtroDisciplina').addEventListener('change', onFiltroChange);
-  document.getElementById('filtroTrimestre').addEventListener('change', onFiltroChange);
-  document.getElementById('btnLimparFiltros').addEventListener('click', () => {
-    document.getElementById('filtroDisciplina').value = '';
-    document.getElementById('filtroTrimestre').value = '';
-    filtroDisciplinaAtiva = '';
-    marcarTabAtiva('');
-    carregarPerguntas();
-  });
+    document.getElementById('filtroDisciplina').addEventListener('change', onFiltroChange);
+    document.getElementById('filtroTrimestre').addEventListener('change', onFiltroChange);
+    document.getElementById('btnLimparFiltros').addEventListener('click', () => {
+      document.getElementById('filtroDisciplina').value = '';
+      document.getElementById('filtroTrimestre').value = '';
+      filtroDisciplinaAtiva = '';
+      marcarTabAtiva('');
+      carregarPerguntas();
+    });
 
-  document.getElementById('perguntaTipo').addEventListener('change', onTipoPerguntaChange);
-  document.getElementById('btnAddResposta').addEventListener('click', () => addRespostaRow());
+    document.getElementById('perguntaTipo').addEventListener('change', onTipoPerguntaChange);
+    document.getElementById('btnAddResposta').addEventListener('click', () => addRespostaRow());
 
-  document.getElementById('btnNovaPergunta').addEventListener('click', () => {
-    resetFormNovaPergunta();
-    openModal('modalNovaPergunta');
-  });
-  document.getElementById('btnGerarProva').addEventListener('click', () => openModal('modalGerarProva'));
+    document.getElementById('btnNovaPergunta').addEventListener('click', () => {
+      resetFormNovaPergunta();
+      openModal('modalNovaPergunta');
+    });
+    document.getElementById('btnGerarProva').addEventListener('click', () => openModal('modalGerarProva'));
+  } catch (err) {
+    console.error('ERRO NA INICIALIZAÇÃO DA PÁGINA:', err);
+    toast('ERRO AO INICIALIZAR A PÁGINA: ' + err.message, 'error');
+  }
 });
 
 /* -------------------------------------------------------------------------
@@ -140,9 +145,9 @@ function atualizarEstadoBotoesPergunta() {
   document.getElementById('btnNovaPergunta').disabled = semDisciplina;
   document.getElementById('btnGerarProva').disabled = semDisciplina;
   document.getElementById('btnNovaPergunta').title = semDisciplina
-    ? 'Cadastre uma disciplina primeiro' : '';
+      ? 'Cadastre uma disciplina primeiro' : '';
   document.getElementById('btnGerarProva').title = semDisciplina
-    ? 'Cadastre uma disciplina primeiro' : '';
+      ? 'Cadastre uma disciplina primeiro' : '';
 }
 
 /* -------------------------------------------------------------------------
@@ -178,7 +183,7 @@ function onPerguntaDisciplinaChange() {
     temaSelect.innerHTML = '<option value="">Nenhum tema — cadastre um</option>';
   } else {
     temaSelect.innerHTML = '<option value="">Selecione...</option>' +
-      temasDaDisciplina.map(t => `<option value="${t.id}">${escapeHtml(t.nome)}</option>`).join('');
+        temasDaDisciplina.map(t => `<option value="${t.id}">${escapeHtml(t.nome)}</option>`).join('');
   }
 }
 
