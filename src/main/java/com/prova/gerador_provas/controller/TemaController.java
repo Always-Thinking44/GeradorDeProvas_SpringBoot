@@ -25,7 +25,7 @@ public class TemaController {
     }
 
     @PostMapping
-    public Tema createTheme(Tema tema) {
+    public Tema createTheme(@RequestBody Tema tema) {
         return temaService.save(tema);
     }
 

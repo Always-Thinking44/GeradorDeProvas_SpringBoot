@@ -174,10 +174,15 @@ const Api = {
     listarTemas() {
         return request('/api/temas');
     },
-    criarTema({ nome, disciplinaId }) {
+    criarTema({ nome, disciplinaId, classeId, trimestre }) {
         return request('/api/temas', {
             method: 'POST',
-            body: JSON.stringify({ nome, disciplina: { id: Number(disciplinaId) } }),
+            body: JSON.stringify({
+                nome,
+                disciplina: { id: Number(disciplinaId) },
+                classe: { id: Number(classeId) },
+                trimestre,
+            }),
         });
     },
 

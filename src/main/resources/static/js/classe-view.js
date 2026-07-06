@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Enums (trimestre, nível, tipo) — vindos de api.js
  * ---------------------------------------------------------------------- */
 function preencherSelectsEnum() {
-  const trimestreSelects = ['perguntaTrimestre', 'gerarProvaTrimestre', 'filtroTrimestre'];
+  const trimestreSelects = ['perguntaTrimestre', 'gerarProvaTrimestre', 'filtroTrimestre', 'novoTemaTrimestre'];
   trimestreSelects.forEach(id => {
     const select = document.getElementById(id);
     ENUMS.trimestre.forEach(op => {
@@ -196,6 +196,7 @@ function abrirModalNovoTema() {
   const disciplina = disciplinasCache.find(d => String(d.id) === String(disciplinaId));
   document.getElementById('novoTemaDisciplinaNome').value = disciplina?.nome || '';
   document.getElementById('novoTemaNome').value = '';
+  document.getElementById('novoTemaTrimestre').value = '';
   document.getElementById('novoTemaErro').style.display = 'none';
   openModal('modalNovoTema');
 }
@@ -204,6 +205,7 @@ async function onSubmitNovoTema(e) {
   e.preventDefault();
   const disciplinaId = document.getElementById('perguntaDisciplina').value;
   const nome = document.getElementById('novoTemaNome').value.trim();
+  const trimestre = document.getElementById('novoTemaTrimestre').value;
   const erro = document.getElementById('novoTemaErro');
   erro.style.display = 'none';
 
@@ -212,11 +214,16 @@ async function onSubmitNovoTema(e) {
     erro.style.display = 'block';
     return;
   }
+  if (!trimestre) {
+    erro.textContent = 'Selecione o trimestre.';
+    erro.style.display = 'block';
+    return;
+  }
 
   const btn = e.target.querySelector('button[type=submit]');
   btn.disabled = true;
   try {
-    const tema = await Api.criarTema({ nome, disciplinaId });
+    const tema = await Api.criarTema({ nome, disciplinaId, classeId: CLASSE_ID, trimestre });
     temasCache.push(tema);
     onPerguntaDisciplinaChange();
     document.getElementById('perguntaTema').value = tema.id;

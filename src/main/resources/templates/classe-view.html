@@ -33,7 +33,7 @@
                 <span style="color:var(--text-muted);font-size:.85rem">Carregando disciplinas...</span>
             </div>
             <div id="disciplinasEmpty" class="empty-state" style="display:none">
-                <div class="emoji"></div>
+                <div class="emoji">📚</div>
                 Nenhuma disciplina cadastrada nesta classe ainda.<br>
                 Cadastre a primeira disciplina para poder criar perguntas.
             </div>
@@ -45,7 +45,7 @@
                 <h2>Perguntas</h2>
                 <div style="display:flex;gap:10px">
                     <button class="btn btn-outline btn-sm" id="btnGerarProva" disabled>
-                         Gerar prova
+                        🧾 Gerar prova
                     </button>
                     <button class="btn btn-primary btn-sm" id="btnNovaPergunta" disabled>
                         ＋ Nova pergunta
@@ -75,22 +75,22 @@
             <div class="table-wrap">
                 <table class="data-table">
                     <thead>
-                        <tr>
-                            <th>Enunciado</th>
-                            <th>Disciplina</th>
-                            <th>Trimestre</th>
-                            <th>Dificuldade</th>
-                            <th>Tipo</th>
-                            <th></th>
-                        </tr>
+                    <tr>
+                        <th>Enunciado</th>
+                        <th>Disciplina</th>
+                        <th>Trimestre</th>
+                        <th>Dificuldade</th>
+                        <th>Tipo</th>
+                        <th></th>
+                    </tr>
                     </thead>
                     <tbody id="perguntasTableBody">
-                        <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>
+                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
             <div id="perguntasEmpty" class="empty-state" style="display:none">
-                <div class="emoji"></div>
+                <div class="emoji">❓</div>
                 Nenhuma pergunta encontrada para os filtros selecionados.
             </div>
         </div>
@@ -227,6 +227,12 @@
                     <label for="novoTemaNome">Nome do tema</label>
                     <input type="text" id="novoTemaNome" placeholder="Ex: Frações" required>
                     <div class="form-error" id="novoTemaErro"></div>
+                </div>
+                <div class="form-group">
+                    <label for="novoTemaTrimestre">Trimestre</label>
+                    <select id="novoTemaTrimestre" required>
+                        <option value="">Selecione...</option>
+                    </select>
                 </div>
             </div>
             <div class="modal__footer">
