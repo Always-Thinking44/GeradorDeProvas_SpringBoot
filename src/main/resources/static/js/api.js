@@ -242,7 +242,7 @@ async function carregarSidebarClasses() {
         lista.innerHTML = classes.map(c => `
       <li>
         <a class="nav-link ${String(ativaId) === String(c.id) ? 'active' : ''}" href="/classes/${c.id}">
-          <span class="icon">🏫</span> ${escapeHtml(c.nome)}
+          <span class="icon"></span> ${escapeHtml(c.nome)}
         </a>
       </li>
     `).join('');
