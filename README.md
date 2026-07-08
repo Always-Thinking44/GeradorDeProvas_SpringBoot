@@ -1,4 +1,3 @@
-# GeradorDeProvas_SpringBoot
 # Gerador de Provas
 
 Sistema web para gestão de turmas, disciplinas, temas e banco de perguntas, com geração automática de provas. Backend em **Java + Spring Boot**, frontend em **Thymeleaf + JavaScript puro (vanilla)**.
