@@ -444,8 +444,8 @@ function onTipoPerguntaChange() {
     if (tipo === 'VERDADEIRO_FALSO') {
         respostasList.innerHTML = '';
         respostaIdCounter = 0;
-        addRespostaRow('Verdadeiro', true, true);
-        addRespostaRow('Falso', false, true);
+        addRespostaRow('Verdadeiro', true, true, { selecaoUnica: true });
+        addRespostaRow('Falso', false, true, { selecaoUnica: true });
         btnAdd.style.display = 'none';
         return;
     }
@@ -482,6 +482,19 @@ function addRespostaRow(texto = '', correta = false, bloqueada = false, opts = {
     ${bloqueada || opts.esconderCorreta ? '' : '<button type="button" class="remove-resposta" title="Remover">✕</button>'}
   `;
     row.querySelector('.remove-resposta')?.addEventListener('click', () => row.remove());
+
+    // NOVO: em tipos de seleção única (ex: Verdadeiro/Falso), marcar uma desmarca as outras
+    if (opts.selecaoUnica) {
+        const checkbox = row.querySelector('input[type=checkbox]');
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                list.querySelectorAll('.resposta-row input[type=checkbox]').forEach(cb => {
+                    if (cb !== checkbox) cb.checked = false;
+                });
+            }
+        });
+    }
+
     list.appendChild(row);
 }
 
@@ -526,6 +539,16 @@ async function onSubmitNovaPergunta(e) {
             erro.textContent = 'Marque ao menos uma resposta como correta.';
             erro.style.display = 'block';
             return;
+        }
+
+        // NOVO: Verdadeiro/Falso e Completar exigem exatamente UMA resposta correta
+        if ((tipoPergunta === 'VERDADEIRO_FALSO' || tipoPergunta === 'COMPLETAR')) {
+            const totalCorretas = respostas.filter(r => r.correta).length;
+            if (totalCorretas !== 1) {
+                erro.textContent = 'Este tipo de pergunta exige exatamente uma resposta correta.';
+                erro.style.display = 'block';
+                return;
+            }
         }
     }
 
