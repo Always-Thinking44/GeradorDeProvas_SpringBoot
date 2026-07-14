@@ -23,9 +23,14 @@
         <div class="card">
             <div class="card__header">
                 <h2>Disciplinas</h2>
-                <button class="btn btn-primary btn-sm" onclick="openModal('modalNovaDisciplina')">
-                    ＋ Nova disciplina
-                </button>
+                <div style="display:flex;gap:10px">
+                    <button class="btn btn-outline btn-sm" id="btnNovoTemaDisciplinas" disabled>
+                        ＋ Novo tema
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="openModal('modalNovaDisciplina')">
+                        ＋ Nova disciplina
+                    </button>
+                </div>
             </div>
 
             <div id="disciplinasTabs" class="tabs">
@@ -237,6 +242,44 @@
             </div>
             <div class="modal__footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modalNovoTema')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar tema</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: Novo Tema (geral, chamado do cartão de Disciplinas)
+     ============================================================ -->
+<div class="modal-overlay" id="modalNovoTemaGeral">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Novo tema</h3>
+            <button class="modal__close" onclick="closeModal('modalNovoTemaGeral')">&times;</button>
+        </div>
+        <form id="formNovoTemaGeral">
+            <div class="modal__body">
+                <div class="form-group">
+                    <label for="novoTemaGeralDisciplina">Disciplina</label>
+                    <select id="novoTemaGeralDisciplina" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="novoTemaGeralNome">Nome do tema</label>
+                    <input type="text" id="novoTemaGeralNome" placeholder="Ex: Frações" required>
+                    <div class="form-error" id="novoTemaGeralErro"></div>
+                </div>
+                <div class="form-group">
+                    <label for="novoTemaGeralTrimestre">Trimestre</label>
+                    <select id="novoTemaGeralTrimestre" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalNovoTemaGeral')">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Cadastrar tema</button>
             </div>
         </form>
