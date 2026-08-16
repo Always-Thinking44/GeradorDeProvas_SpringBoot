@@ -164,7 +164,7 @@ public class PerguntaService {
         long corretas =
                 pergunta.getRespostas()
                         .stream()
-                        .filter(Resposta::getCorreta)
+                        .filter(r -> Boolean.TRUE.equals(r.getCorreta()))
                         .count();
 
         if (corretas == 0) {

@@ -54,6 +54,7 @@ function renderPerguntas(perguntas) {
       <td><span class="badge badge-gray">${labelDoEnum(ENUMS.trimestre, p.trimestre)}</span></td>
       <td><span class="badge ${badgeNivel(p.nivelDificuldade)}">${labelDoEnum(ENUMS.nivelDificuldade, p.nivelDificuldade)}</span></td>
       <td><span class="badge badge-purple">${labelDoEnum(ENUMS.tipoPergunta, p.tipoPergunta)}</span></td>
+      <td><span class="badge badge-gray">${p.pontuacao != null ? p.pontuacao + ' pts' : '—'}</span></td>
       <td>
         <button class="btn btn-danger-ghost btn-sm" onclick="removerPergunta(${p.id})">Excluir</button>
       </td>

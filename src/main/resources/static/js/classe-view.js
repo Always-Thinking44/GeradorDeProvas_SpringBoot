@@ -351,7 +351,7 @@ function onFiltroChange() {
 async function carregarPerguntas() {
     const tbody = document.getElementById('perguntasTableBody');
     const empty = document.getElementById('perguntasEmpty');
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>`;
     empty.style.display = 'none';
 
     const filtros = {
@@ -388,6 +388,7 @@ function renderPerguntas(perguntas) {
       <td><span class="badge badge-gray">${labelDoEnum(ENUMS.trimestre, p.trimestre)}</span></td>
       <td><span class="badge ${badgeNivel(p.nivelDificuldade)}">${labelDoEnum(ENUMS.nivelDificuldade, p.nivelDificuldade)}</span></td>
       <td><span class="badge badge-purple">${labelDoEnum(ENUMS.tipoPergunta, p.tipoPergunta)}</span></td>
+      <td><span class="badge badge-gray">${p.pontuacao != null ? p.pontuacao + ' pts' : '—'}</span></td>
       <td>
         <button class="btn btn-danger-ghost btn-sm" onclick="removerPergunta(${p.id})">Excluir</button>
       </td>
@@ -424,6 +425,7 @@ function resetFormNovaPergunta() {
     document.getElementById('formNovaPergunta').reset();
     document.getElementById('novaPerguntaErro').style.display = 'none';
     document.getElementById('respostasList').innerHTML = '';
+    document.getElementById('perguntaPontuacao').value = '';
     respostaIdCounter = 0;
     addRespostaRow();
     addRespostaRow();
@@ -511,7 +513,7 @@ function coletarRespostas() {
 
     const rows = document.querySelectorAll('#respostasList .resposta-row');
     return Array.from(rows).map(row => ({
-        texto: row.querySelector('input[type=text]').value.trim(),
+        descricao: row.querySelector('input[type=text]').value.trim(),
         correta: row.querySelector('input[type=checkbox]').checked,
     }));
 }
@@ -527,6 +529,7 @@ async function onSubmitNovaPergunta(e) {
     const nivelDificuldade = document.getElementById('perguntaNivel').value;
     const tipoPergunta = document.getElementById('perguntaTipo').value;
     const enunciado = document.getElementById('perguntaEnunciado').value.trim();
+    const pontuacao = document.getElementById('perguntaPontuacao').value;
     const respostas = coletarRespostas();
 
     if (!disciplinaId || !temaId || !trimestre || !nivelDificuldade || !tipoPergunta || !enunciado) {
@@ -534,8 +537,13 @@ async function onSubmitNovaPergunta(e) {
         erro.style.display = 'block';
         return;
     }
+    if (!pontuacao || Number(pontuacao) <= 0) {
+        erro.textContent = 'Informe a pontuação da pergunta.';
+        erro.style.display = 'block';
+        return;
+    }
     if (tipoPergunta !== 'DESENVOLVIMENTO') {
-        const semTexto = respostas.some(r => !r.texto);
+        const semTexto = respostas.some(r => !r.descricao);
         const semCorreta = !respostas.some(r => r.correta);
         if (respostas.length === 0 || semTexto) {
             erro.textContent = 'Preencha o texto de todas as respostas.';
@@ -561,6 +569,7 @@ async function onSubmitNovaPergunta(e) {
 
     const payload = {
         enunciado,
+        pontuacao: Number(pontuacao),
         trimestre,
         nivelDificuldade,
         tipoPergunta,

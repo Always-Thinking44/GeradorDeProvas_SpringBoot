@@ -16,7 +16,7 @@
         <div class="card">
             <div class="card__header">
                 <h2>Provas geradas</h2>
-                <a class="btn btn-primary btn-sm" href="/classes">＋ Gerar nova prova</a>
+                <button class="btn btn-primary btn-sm" id="btnGerarProva">＋ Gerar nova prova</button>
             </div>
 
             <div class="table-wrap">
@@ -66,15 +66,182 @@
             </div>
             <div class="empty-state" th:if="${#lists.isEmpty(provas)}">
                 <div class="emoji"></div>
-                Nenhuma prova gerada ainda. Vá até uma turma e clique em "Gerar prova".
+                Nenhuma prova gerada ainda. Clique em "Gerar nova prova" para começar.
             </div>
         </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Gerar Prova
+     ============================================================ -->
+<div class="modal-overlay" id="modalGerarProva">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Gerar prova</h3>
+            <button class="modal__close" onclick="closeModal('modalGerarProva')">&times;</button>
+        </div>
+        <form id="formGerarProva">
+            <div class="modal__body">
+                <p style="color:var(--text-muted);margin-top:0">
+                    Selecione a classe, disciplina, trimestre e modelo de layout para gerar
+                    a prova a partir do modelo de seções cadastrado.
+                </p>
+                <div class="form-group">
+                    <label for="gerarProvaClasse">Classe</label>
+                    <select id="gerarProvaClasse" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gerarProvaDisciplina">Disciplina</label>
+                    <select id="gerarProvaDisciplina" required disabled>
+                        <option value="">Selecione a classe primeiro...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gerarProvaTrimestre">Trimestre</label>
+                    <select id="gerarProvaTrimestre" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gerarProvaModelo">Modelo de prova (layout)</label>
+                    <select id="gerarProvaModelo" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                    <div class="hint">O modelo define a aparência (clássico, moderno ou compacto) da prova e do PDF.</div>
+                </div>
+                <div class="form-error" id="gerarProvaErro"></div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalGerarProva')">Cancelar</button>
+                <button type="submit" class="btn btn-success">Gerar prova</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
 <div th:replace="~{fragments/layout :: toastContainer}"></div>
 <div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+
+<script>
+(function () {
+    const ENUMS = window.ENUMS;
+
+    function preencherSelectsEnum() {
+        ['gerarProvaTrimestre'].forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            ENUMS.trimestre.forEach(op => {
+                select.insertAdjacentHTML('beforeend', '<option value="' + op.value + '">' + op.label + '</option>');
+            });
+        });
+        const modeloSelect = document.getElementById('gerarProvaModelo');
+        if (modeloSelect) {
+            ENUMS.modeloTemplate.forEach(op => {
+                modeloSelect.insertAdjacentHTML('beforeend', '<option value="' + op.value + '">' + op.label + '</option>');
+            });
+        }
+    }
+
+    async function carregarClasses() {
+        const select = document.getElementById('gerarProvaClasse');
+        try {
+            const classes = await Api.listarClasses();
+            if (classes && classes.length > 0) {
+                classes.forEach(c => {
+                    select.insertAdjacentHTML('beforeend', '<option value="' + c.id + '">' + escapeHtml(c.nome) + '</option>');
+                });
+            }
+        } catch (err) {
+            console.error('Erro ao carregar classes:', err);
+        }
+    }
+
+    async function onClasseChange() {
+        const classeId = document.getElementById('gerarProvaClasse').value;
+        const discSelect = document.getElementById('gerarProvaDisciplina');
+        discSelect.innerHTML = '<option value="">Carregando...</option>';
+        discSelect.disabled = true;
+
+        if (!classeId) {
+            discSelect.innerHTML = '<option value="">Selecione a classe primeiro...</option>';
+            return;
+        }
+
+        try {
+            const disciplinas = await Api.listarDisciplinas(classeId) || [];
+            discSelect.innerHTML = '<option value="">Selecione...</option>';
+            disciplinas.forEach(d => {
+                discSelect.insertAdjacentHTML('beforeend', '<option value="' + d.id + '">' + escapeHtml(d.nome) + '</option>');
+            });
+            discSelect.disabled = false;
+        } catch (err) {
+            discSelect.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
+            console.error(err);
+        }
+    }
+
+    async function onSubmitGerarProva(e) {
+        e.preventDefault();
+        const erro = document.getElementById('gerarProvaErro');
+        erro.style.display = 'none';
+
+        const classeId = document.getElementById('gerarProvaClasse').value;
+        const disciplinaId = document.getElementById('gerarProvaDisciplina').value;
+        const trimestre = document.getElementById('gerarProvaTrimestre').value;
+        const modelo = document.getElementById('gerarProvaModelo').value;
+
+        if (!classeId || !disciplinaId || !trimestre) {
+            erro.textContent = 'Selecione a classe, disciplina e trimestre.';
+            erro.style.display = 'block';
+            return;
+        }
+        if (!modelo) {
+            erro.textContent = 'Selecione o modelo de prova.';
+            erro.style.display = 'block';
+            return;
+        }
+
+        const btn = e.target.querySelector('button[type=submit]');
+        btn.disabled = true;
+        try {
+            const prova = await Api.gerarProva({ classeId, disciplinaId, trimestre, modelo });
+            toast('Prova gerada com sucesso!', 'success');
+            closeModal('modalGerarProva');
+            if (prova && prova.id) {
+                window.location.href = '/provas/' + prova.id;
+            } else {
+                window.location.reload();
+            }
+        } catch (err) {
+            erro.textContent = err.message;
+            erro.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        preencherSelectsEnum();
+        carregarClasses();
+
+        document.getElementById('btnGerarProva').addEventListener('click', function () {
+            document.getElementById('formGerarProva').reset();
+            document.getElementById('gerarProvaErro').style.display = 'none';
+            var discSelect = document.getElementById('gerarProvaDisciplina');
+            discSelect.innerHTML = '<option value="">Selecione a classe primeiro...</option>';
+            discSelect.disabled = true;
+            openModal('modalGerarProva');
+        });
+
+        document.getElementById('gerarProvaClasse').addEventListener('change', onClasseChange);
+        document.getElementById('formGerarProva').addEventListener('submit', onSubmitGerarProva);
+    });
+})();
+</script>
 
 </body>
 </html>
