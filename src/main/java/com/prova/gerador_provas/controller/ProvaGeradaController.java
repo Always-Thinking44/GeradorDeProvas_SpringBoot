@@ -43,6 +43,11 @@ public class ProvaGeradaController {
         );
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteGeneratedExam(@PathVariable Long id) {
+        provaGeradaService.delete(id);
+    }
+
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> downloadProvaPdf(
             @PathVariable Long id) {

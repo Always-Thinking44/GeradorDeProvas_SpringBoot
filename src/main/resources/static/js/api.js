@@ -238,6 +238,12 @@ const Api = {
             body: JSON.stringify(payload),
         });
     },
+    atualizarPergunta(id, payload) {
+        return request(`/api/pergunta/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        });
+    },
     removerPergunta(id) {
         return request(`/api/pergunta/${id}`, { method: 'DELETE' });
     },
@@ -256,6 +262,9 @@ const Api = {
                 modelo,
             }),
         });
+    },
+    removerProvaGerada(id) {
+        return request(`/api/prova_gerada/${id}`, { method: 'DELETE' });
     },
 };
 

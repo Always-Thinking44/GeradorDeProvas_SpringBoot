@@ -131,6 +131,10 @@ public class ProvaGeradaService {
                         new EntityNotFoundException("Prova não encontrada."));
     }
 
+    public void delete(Long id) {
+        provaRepository.delete(findById(id));
+    }
+
     public ProvaGeradaResumo toResumo(ProvaGerada prova) {
         List<PerguntaSnapshot> perguntas = parseSnapshot(prova);
         ProvaGeradaResumo resumo = new ProvaGeradaResumo();

@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('btnNovaPergunta').addEventListener('click', () => {
             resetFormNovaPergunta();
+            document.querySelector('#modalNovaPergunta h3').textContent = 'Nova pergunta';
             openModal('modalNovaPergunta');
         });
         document.getElementById('btnGerarProva').addEventListener('click', () => openModal('modalGerarProva'));
@@ -390,6 +391,7 @@ function renderPerguntas(perguntas) {
       <td><span class="badge badge-purple">${labelDoEnum(ENUMS.tipoPergunta, p.tipoPergunta)}</span></td>
       <td><span class="badge badge-gray">${p.pontuacao != null ? p.pontuacao + ' pts' : '—'}</span></td>
       <td>
+        <button class="btn btn-outline btn-sm" onclick="editarPergunta(${p.id})">Editar</button>
         <button class="btn btn-danger-ghost btn-sm" onclick="removerPergunta(${p.id})">Excluir</button>
       </td>
     </tr>
@@ -418,11 +420,55 @@ async function removerPergunta(id) {
     }
 }
 
+async function editarPergunta(id) {
+    try {
+        const todas = await Api.listarPerguntas({ classeId: CLASSE_ID }) || [];
+        const p = todas.find(q => String(q.id) === String(id));
+        if (!p) { toast('Pergunta não encontrada.', 'error'); return; }
+
+        resetFormNovaPergunta();
+        document.querySelector('#modalNovaPergunta h3').textContent = 'Editar pergunta';
+        document.getElementById('perguntaEditId').value = p.id;
+        document.getElementById('perguntaDisciplina').value = p.disciplina?.id || '';
+        document.getElementById('perguntaTrimestre').value = p.trimestre || '';
+        document.getElementById('perguntaNivel').value = p.nivelDificuldade || '';
+        document.getElementById('perguntaTipo').value = p.tipoPergunta || '';
+        document.getElementById('perguntaEnunciado').value = p.enunciado || '';
+        document.getElementById('perguntaPontuacao').value = p.pontuacao || '';
+
+        onPerguntaDisciplinaChange();
+        if (p.tema?.id) {
+            setTimeout(() => { document.getElementById('perguntaTema').value = p.tema.id; }, 100);
+        }
+
+        onTipoPerguntaChange();
+        if (p.tipoPergunta !== 'DESENVOLVIMENTO' && p.respostas && p.respostas.length > 0) {
+            const list = document.getElementById('respostasList');
+            list.innerHTML = '';
+            respostaIdCounter = 0;
+            p.respostas.forEach(r => {
+                const bloqueada = (p.tipoPergunta === 'VERDADEIRO_FALSO');
+                addRespostaRow(r.descricao || '', r.correta, bloqueada, {
+                    selecaoUnica: bloqueada,
+                });
+            });
+            if (p.tipoPergunta === 'ESCOLHA_MULTIPLA') {
+                document.getElementById('btnAddResposta').style.display = 'inline-flex';
+            }
+        }
+
+        openModal('modalNovaPergunta');
+    } catch (err) {
+        toast('Erro ao carregar pergunta: ' + err.message, 'error');
+    }
+}
+
 /* -------------------------------------------------------------------------
  * Modal: Nova Pergunta — respostas dinâmicas
  * ---------------------------------------------------------------------- */
 function resetFormNovaPergunta() {
     document.getElementById('formNovaPergunta').reset();
+    document.getElementById('perguntaEditId').value = '';
     document.getElementById('novaPerguntaErro').style.display = 'none';
     document.getElementById('respostasList').innerHTML = '';
     document.getElementById('perguntaPontuacao').value = '';
@@ -582,8 +628,14 @@ async function onSubmitNovaPergunta(e) {
     const btn = e.target.querySelector('button[type=submit]');
     btn.disabled = true;
     try {
-        await Api.criarPergunta(payload);
-        toast('Pergunta cadastrada com sucesso!', 'success');
+        const editId = document.getElementById('perguntaEditId').value;
+        if (editId) {
+            await Api.atualizarPergunta(editId, payload);
+            toast('Pergunta atualizada com sucesso!', 'success');
+        } else {
+            await Api.criarPergunta(payload);
+            toast('Pergunta cadastrada com sucesso!', 'success');
+        }
         closeModal('modalNovaPergunta');
         carregarPerguntas();
     } catch (err) {

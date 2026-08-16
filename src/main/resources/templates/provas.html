@@ -59,6 +59,7 @@
                             <a class="btn btn-outline btn-sm" th:href="@{/provas/{id}/gabarito(id=${p.id})}">Gabarito</a>
                             <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/pdf(id=${p.id})}">PDF</a>
                             <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/gabarito/pdf(id=${p.id})}">PDF gabarito</a>
+                            <button class="btn btn-danger-ghost btn-sm" th:onclick="'removerProvaGerada(' + ${p.id} + ')'">Excluir</button>
                         </td>
                     </tr>
                     </tbody>
@@ -240,7 +241,21 @@
         document.getElementById('gerarProvaClasse').addEventListener('change', onClasseChange);
         document.getElementById('formGerarProva').addEventListener('submit', onSubmitGerarProva);
     });
+
 })();
+</script>
+
+<script>
+async function removerProvaGerada(id) {
+    if (!confirm('Deseja realmente excluir esta prova gerada?')) return;
+    try {
+        await Api.removerProvaGerada(id);
+        toast('Prova removida.', 'success');
+        window.location.reload();
+    } catch (err) {
+        toast('Erro ao remover: ' + err.message, 'error');
+    }
+}
 </script>
 
 </body>
