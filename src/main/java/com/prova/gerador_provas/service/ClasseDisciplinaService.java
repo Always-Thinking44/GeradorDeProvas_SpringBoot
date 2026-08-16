@@ -42,7 +42,7 @@ public class ClasseDisciplinaService {
     }
 
     public void removerDisciplinaDaClasse(Long classeId, Long disciplinaId) {
-        ClasseDisciplina vinculo = (ClasseDisciplina) repository.findByClasseIdAndDisciplinaId(classeId, disciplinaId)
+        ClasseDisciplina vinculo = repository.findByClasseIdAndDisciplinaId(classeId, disciplinaId)
                 .orElseThrow(() -> new EntityNotFoundException("Vínculo não encontrado."));
         repository.delete(vinculo);
     }

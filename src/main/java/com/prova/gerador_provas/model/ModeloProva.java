@@ -1,4 +1,5 @@
 package com.prova.gerador_provas.model;
+import com.prova.gerador_provas.enums.ModeloTemplate;
 import com.prova.gerador_provas.enums.Trimestre;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,10 @@ public class ModeloProva {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Trimestre trimestre;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ModeloTemplate template = ModeloTemplate.MODELO_1;
 
     @OneToMany(
             mappedBy = "modeloProva",

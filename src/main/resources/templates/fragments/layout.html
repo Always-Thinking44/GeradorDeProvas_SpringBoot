@@ -28,6 +28,12 @@
         </button>
 
         <div class="sidebar__section-title">Outros</div>
+        <a class="nav-link" th:classappend="${activePage == 'disciplinas'} ? 'active'"
+           href="/disciplinas"><span class="icon"></span> Disciplinas</a>
+        <a class="nav-link" th:classappend="${activePage == 'temas'} ? 'active'"
+           href="/temas"><span class="icon"></span> Temas</a>
+        <a class="nav-link" th:classappend="${activePage == 'perguntas'} ? 'active'"
+           href="/perguntas"><span class="icon"></span> Perguntas</a>
         <a class="nav-link" th:classappend="${activePage == 'modelos'} ? 'active'"
            href="/modelos"><span class="icon"></span> Modelos de prova</a>
         <a class="nav-link" th:classappend="${activePage == 'provas'} ? 'active'"

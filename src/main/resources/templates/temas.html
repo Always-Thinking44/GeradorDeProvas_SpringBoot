@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Temas · Gerador de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Temas', 'Conteúdos por turma, disciplina e trimestre')}"></div>
+
+    <div class="content">
+        <div class="card">
+            <div class="card__header">
+                <h2>Temas cadastrados</h2>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modalNovoTema')">
+                    ＋ Novo tema
+                </button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Disciplina</th>
+                        <th>Classe</th>
+                        <th>Trimestre</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="t : ${temas}">
+                        <td th:text="${t.nome}">Tema</td>
+                        <td th:text="${t.disciplina?.nome ?: '—'}">Disciplina</td>
+                        <td th:text="${t.classe?.nome ?: '—'}">Classe</td>
+                        <td th:switch="${t.trimestre}">
+                            <span th:case="'PRIMEIRO'">1º Trimestre</span>
+                            <span th:case="'SEGUNDO'">2º Trimestre</span>
+                            <span th:case="'TERCEIRO'">3º Trimestre</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger-ghost btn-sm" th:attr="data-id=${t.id}, data-nome=${t.nome}" onclick="removerTema(this.dataset.id, this.dataset.nome)">Excluir</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty-state" th:if="${#lists.isEmpty(temas)}">
+                <div class="emoji"></div>
+                Nenhum tema cadastrado.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Novo Tema -->
+<div class="modal-overlay" id="modalNovoTema">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Novo tema</h3>
+            <button class="modal__close" onclick="closeModal('modalNovoTema')">&times;</button>
+        </div>
+        <form id="formNovoTema">
+            <div class="modal__body">
+                <div class="form-group">
+                    <label for="temaNome">Nome do tema</label>
+                    <input type="text" id="temaNome" placeholder="Ex: Frações" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="temaClasse">Classe</label>
+                        <select id="temaClasse" required>
+                            <option value="">Selecione...</option>
+                            <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.nome}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="temaDisciplina">Disciplina</label>
+                        <select id="temaDisciplina" required>
+                            <option value="">Selecione...</option>
+                            <option th:each="d : ${disciplinas}" th:value="${d.id}" th:text="${d.nome}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="temaTrimestre">Trimestre</label>
+                    <select id="temaTrimestre" required>
+                        <option value="">Selecione...</option>
+                        <option value="PRIMEIRO">1º Trimestre</option>
+                        <option value="SEGUNDO">2º Trimestre</option>
+                        <option value="TERCEIRO">3º Trimestre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="temaDescricao">Descrição (opcional)</label>
+                    <textarea id="temaDescricao" placeholder="Breve descrição do tema..."></textarea>
+                </div>
+                <div class="form-error" id="temaErro"></div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalNovoTema')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar tema</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
+<div th:replace="~{fragments/layout :: toastContainer}"></div>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+<script th:src="@{/js/temas.js}"></script>
+
+</body>
+</html>

@@ -39,5 +39,6 @@ public class Disciplina {
     private List<Pergunta> perguntas;
 
     @OneToMany(mappedBy = "disciplina")
+    @JsonIgnore
     private List<ModeloProva> modelosProva;
 }

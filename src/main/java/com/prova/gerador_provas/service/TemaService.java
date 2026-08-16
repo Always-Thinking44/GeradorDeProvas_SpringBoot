@@ -24,6 +24,12 @@ public class TemaService {
     }
 
     public Tema save(Tema tema) {
+        if (tema.getNome() == null || tema.getNome().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome do tema é obrigatório.");
+        }
+        if (tema.getDisciplina() == null || tema.getDisciplina().getId() == null) {
+            throw new IllegalArgumentException("Disciplina é obrigatória.");
+        }
         if (repository
                 .existsByNomeIgnoreCaseAndDisciplinaId(
                         tema.getNome(),
@@ -38,18 +44,32 @@ public class TemaService {
     public Tema update(Long id, Tema tema) {
         Tema existing = findById(id);
 
+        String novoNome = tema.getNome() == null ? null : tema.getNome().trim();
+        Long novaDisciplinaId = tema.getDisciplina() == null ? null : tema.getDisciplina().getId();
 
-        existing.setNome(tema.getNome());
-        existing.setDisciplina(tema.getDisciplina());
+        if (novoNome == null || novoNome.isEmpty()) {
+            throw new IllegalArgumentException("Nome do tema é obrigatório.");
+        }
+        if (novaDisciplinaId == null) {
+            throw new IllegalArgumentException("Disciplina é obrigatória.");
+        }
 
         if (repository
-                .existsByNomeIgnoreCaseAndDisciplinaId(
-                        tema.getNome(),
-                        tema.getDisciplina().getId())) {
+                .existsByNomeIgnoreCaseAndDisciplinaIdAndIdNot(
+                        novoNome,
+                        novaDisciplinaId,
+                        id)) {
 
             throw new IllegalArgumentException(
                     "This theme already exists in this subject.");
         }
+
+        existing.setNome(novoNome);
+        existing.setDisciplina(tema.getDisciplina());
+        existing.setClasse(tema.getClasse());
+        existing.setTrimestre(tema.getTrimestre());
+        existing.setDescricao(tema.getDescricao());
+
         return repository.save(existing);
     }
 

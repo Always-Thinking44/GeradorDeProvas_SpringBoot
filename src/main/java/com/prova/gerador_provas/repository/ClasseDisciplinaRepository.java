@@ -18,5 +18,5 @@ public interface ClasseDisciplinaRepository
             Long disciplinaId
     );
 
-    Optional<Object> findByClasseIdAndDisciplinaId(Long classeId, Long disciplinaId);
+    Optional<ClasseDisciplina> findByClasseIdAndDisciplinaId(Long classeId, Long disciplinaId);
 }

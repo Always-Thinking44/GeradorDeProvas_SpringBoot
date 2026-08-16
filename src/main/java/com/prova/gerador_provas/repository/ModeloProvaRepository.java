@@ -25,6 +25,13 @@ public interface ModeloProvaRepository
             Trimestre trimestreId
     );
 
+    List<ModeloProva>
+    findAllByClasseIdAndDisciplinaIdAndTrimestreAndAtivoTrue(
+            Long classeId,
+            Long disciplinaId,
+            Trimestre trimestreId
+    );
+
     Optional<ModeloProva>
     findByClasseIdAndDisciplinaIdAndTrimestreAndAtivoTrue(
             Long classeId,

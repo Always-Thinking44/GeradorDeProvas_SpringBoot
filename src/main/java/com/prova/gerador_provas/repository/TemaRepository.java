@@ -23,4 +23,10 @@ public interface TemaRepository
             String nome,
             Long disciplinaId
     );
+
+    boolean existsByNomeIgnoreCaseAndDisciplinaIdAndIdNot(
+            String nome,
+            Long disciplinaId,
+            Long id
+    );
 }

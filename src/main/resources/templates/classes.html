@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Classes · Gerador de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Classes', 'Gerencie as turmas cadastradas no sistema')}"></div>
+
+    <div class="content">
+        <div class="card">
+            <div class="card__header">
+                <h2>Classes cadastradas</h2>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modalNovaClasse')">
+                    ＋ Nova classe
+                </button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody id="classesTableBody">
+                    <tr th:each="c : ${classes}">
+                        <td>
+                            <a th:href="@{/classes/{id}(id=${c.id})}" style="font-weight:600;text-decoration:none;color:var(--primary)">
+                                <span th:text="${c.nome}">Classe</span>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline btn-sm" th:href="@{/classes/{id}(id=${c.id})}">Abrir</a>
+                            <button class="btn btn-danger-ghost btn-sm" th:attr="data-id=${c.id}, data-nome=${c.nome}" onclick="removerClasse(this.dataset.id, this.dataset.nome)">Excluir</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="classesEmpty" class="empty-state" th:if="${#lists.isEmpty(classes)}">
+                <div class="emoji"></div>
+                Nenhuma classe cadastrada ainda.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
+<div th:replace="~{fragments/layout :: toastContainer}"></div>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+<script th:src="@{/js/classes.js}"></script>
+
+</body>
+</html>

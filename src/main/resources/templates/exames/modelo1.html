@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="'Prova — ' + ${disciplinaNome}">Prova</title>
+  <style>
+    @page { size: A4; margin: 1.6cm 1.8cm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Georgia, 'Times New Roman', serif; font-size: 12pt; color: #1a1a1a; line-height: 1.45; }
+
+    /* barra de ações — apenas na tela (forPdf = false) */
+    .toolbar { position: fixed; top: 0; left: 0; right: 0; background: #111827; padding: 10px 18px; z-index: 50; display: block; }
+    .toolbar a, .toolbar button { display: inline-block; margin-right: 8px; padding: 8px 14px; background: #1f2937; color: #e5e7eb; text-decoration: none; border: 1px solid #374151; border-radius: 6px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; cursor: pointer; }
+    .toolbar a:hover, .toolbar button:hover { background: #4f46e5; color: #fff; }
+    @media print { .toolbar { display: none; } body { padding-top: 0 !important; } }
+
+    body.sheet-body { padding-top: 58px; }
+    @media print { body.sheet-body { padding-top: 0; } }
+
+    .sheet { max-width: 800px; margin: 0 auto; }
+
+    .cabecalho { text-align: center; border-bottom: 3px double #333; padding-bottom: 10px; margin-bottom: 8px; }
+    .cabecalho .instituicao { font-size: 11pt; letter-spacing: .08em; text-transform: uppercase; color: #444; }
+    .cabecalho h1 { font-size: 19pt; margin: 6px 0 2px; font-variant: small-caps; }
+    .cabecalho .sub { font-size: 11.5pt; color: #333; }
+    .cabecalho .meta { margin-top: 8px; font-size: 10.5pt; }
+
+    table.campos { width: 100%; margin-top: 10px; font-size: 10.5pt; border-collapse: collapse; }
+    table.campos td { padding: 4px 6px; }
+
+    .instrucoes { font-size: 10.5pt; font-style: italic; color: #333; margin: 12px 0 4px; }
+
+    .questao { margin-bottom: 18px; }
+    .q-cabecalho { margin-bottom: 4px; }
+    .q-num { font-weight: bold; }
+    .q-texto { }
+    .q-info { font-size: 9.5pt; color: #666; margin-bottom: 6px; }
+
+    ul.alternativas { list-style: none; padding-left: 26px; }
+    ul.alternativas li { margin: 3px 0; }
+    ul.alternativas li.correta { color: #166534; font-weight: bold; }
+    .letra { font-weight: bold; margin-right: 6px; }
+    .check { color: #166534; font-weight: bold; margin-left: 8px; }
+
+    .resposta-bloco { padding-left: 26px; margin: 4px 0; }
+    .resposta-label { font-style: italic; color: #333; }
+    .linha { display: inline-block; width: 260px; border-bottom: 1px dotted #333; }
+    .espaco { height: 90px; border-bottom: 1px solid #ccc; margin: 6px 0 0 26px; }
+    .gabarito-resposta { padding-left: 26px; margin: 4px 0; color: #166534; font-weight: bold; }
+
+    .rodape { margin-top: 30px; border-top: 1px solid #999; padding-top: 8px; font-size: 10pt; text-align: center; color: #555; }
+  </style>
+</head>
+<body class="sheet-body">
+
+  <!-- Barra de ações (não aparece no PDF) -->
+  <div class="toolbar" th:if="${!forPdf}">
+    <a href="/provas">← Voltar</a>
+    <a th:href="${mostrarGabarito ? ('/provas/' + prova.id) : ('/provas/' + prova.id + '/gabarito')}"
+       th:text="${mostrarGabarito ? 'Ver prova' : 'Ver gabarito'}">Ver gabarito</a>
+    <a th:href="'/api/prova_gerada/' + ${prova.id} + '/pdf'">PDF da prova</a>
+    <a th:href="'/api/prova_gerada/' + ${prova.id} + '/gabarito/pdf'">PDF do gabarito</a>
+    <button type="button" onclick="window.print()">Imprimir</button>
+  </div>
+
+  <div class="sheet">
+    <div class="cabecalho">
+      <div class="instituicao">Escola — Avaliação Trimestral</div>
+      <h1>Prova de <span th:text="${disciplinaNome}"></span></h1>
+      <div class="sub">
+        Classe: <strong th:text="${classeNome}"></strong>
+        <span> · </span>
+        <span th:text="${trimestreLabel}"></span>
+        <span> · </span>
+        <span th:text="${templateLabel}"></span>
+      </div>
+      <div class="meta" th:if="${!forPdf}">
+        Data: <span th:text="${dataLabel}"></span>
+        <span> · Total: </span>
+        <span th:text="${totalPontos} + ' pontos'"></span>
+      </div>
+      <table class="campos">
+        <tr>
+          <td>Nome: <span style="border-bottom:1px solid #333;display:inline-block;width:320px">&#160;</span></td>
+          <td>Nº: <span style="border-bottom:1px solid #333;display:inline-block;width:90px">&#160;</span></td>
+          <td>Turma: <span style="border-bottom:1px solid #333;display:inline-block;width:90px">&#160;</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <p class="instrucoes">
+      Leia com atenção cada questão antes de responder. Para as questões de escolha múltipla,
+      marque com X a alternativa correta. Boa prova!
+    </p>
+
+    <div class="questoes">
+      <div class="questao" th:each="q, st : ${perguntas}">
+        <div class="q-cabecalho">
+          <span class="q-num" th:text="${st.index + 1} + '.'"></span>
+          <span th:text="${q.enunciado}"></span>
+        </div>
+        <div class="q-info">
+          <span th:text="${q.tipoLabel}"></span>
+          <span th:if="${q.tema != null}" th:text="' · ' + ${q.tema}"></span>
+          <span th:if="${q.pontuacao != null}" th:text="' · ' + ${q.pontuacao} + ' pts'"></span>
+        </div>
+
+        <th:block th:if="${#strings.equals(q.tipoPergunta, 'ESCOLHA_MULTIPLA') or #strings.equals(q.tipoPergunta, 'VERDADEIRO_FALSO')}">
+          <ul class="alternativas">
+            <li th:each="r, rs : ${q.respostas}" th:classappend="${mostrarGabarito and r.correta} ? 'correta'">
+              <span class="letra" th:text="${r.letra} + ')'"></span>
+              <span th:text="${r.descricao}"></span>
+              <span class="check" th:if="${mostrarGabarito and r.correta}" th:text="'✔ CORRETA'"></span>
+            </li>
+          </ul>
+        </th:block>
+
+        <div th:if="${!mostrarGabarito and #strings.equals(q.tipoPergunta, 'COMPLETAR')}" class="resposta-bloco">
+          <span class="resposta-label">Resposta:</span> <span class="linha">&#160;</span>
+        </div>
+        <div th:if="${!mostrarGabarito and #strings.equals(q.tipoPergunta, 'DESENVOLVIMENTO')}" class="resposta-bloco">
+          <span class="resposta-label">Resposta:</span>
+          <div class="espaco"></div>
+        </div>
+        <th:block th:if="${mostrarGabarito and #strings.equals(q.tipoPergunta, 'COMPLETAR')}">
+          <div class="gabarito-resposta">
+            Resposta correta: <strong th:text="${#lists.isEmpty(q.respostas) ? '' : q.respostas[0].descricao}"></strong>
+          </div>
+        </th:block>
+        <th:block th:if="${mostrarGabarito and #strings.equals(q.tipoPergunta, 'DESENVOLVIMENTO')}">
+          <div class="gabarito-resposta">Resposta discursiva — correção manual.</div>
+        </th:block>
+      </div>
+    </div>
+
+    <div class="rodape">
+      <span th:if="${mostrarGabarito}">Gabarito · </span>
+      <span>Total da prova: </span>
+      <span th:text="${totalPontos} + ' pontos'"></span>
+    </div>
+  </div>
+
+</body>
+</html>

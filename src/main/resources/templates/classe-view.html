@@ -298,8 +298,8 @@
         <form id="formGerarProva">
             <div class="modal__body">
                 <p style="color:var(--text-muted);margin-top:0">
-                    Selecione a disciplina e o trimestre para gerar a prova a partir do
-                    modelo cadastrado.
+                    Selecione a disciplina, o trimestre e o modelo de layout para gerar
+                    a prova a partir do modelo de seções cadastrado.
                 </p>
                 <div class="form-group">
                     <label for="gerarProvaDisciplina">Disciplina</label>
@@ -312,6 +312,13 @@
                     <select id="gerarProvaTrimestre" required>
                         <option value="">Selecione...</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="gerarProvaModelo">Modelo de prova (layout)</label>
+                    <select id="gerarProvaModelo" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                    <div class="hint">O modelo define a aparência (clássico, moderno ou compacto) da prova e do PDF.</div>
                 </div>
                 <div class="form-error" id="gerarProvaErro"></div>
             </div>

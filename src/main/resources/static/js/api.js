@@ -89,6 +89,11 @@ const ENUMS = {
         { value: 'DESENVOLVIMENTO',  label: 'Desenvolvimento' },
         { value: 'COMPLETAR',        label: 'Completar' },
     ],
+    modeloTemplate: [
+        { value: 'MODELO_1', label: 'Modelo 1 — Clássico' },
+        { value: 'MODELO_2', label: 'Modelo 2 — Moderno' },
+        { value: 'MODELO_3', label: 'Modelo 3 — Compacto' },
+    ],
 };
 
 /* -------------------------------------------------------------------------
@@ -185,6 +190,34 @@ const Api = {
             }),
         });
     },
+    removerTema(id) {
+        return request(`/api/temas/${id}`, { method: 'DELETE' });
+    },
+
+    /* ---- Disciplina (CRUD global) ---- */
+    removerDisciplinaGlobal(id) {
+        return request(`/api/disciplinas/${id}`, { method: 'DELETE' });
+    },
+
+    /* ---- Modelo de prova: /api/modelo_prova ---- */
+    listarModelos() {
+        return request('/api/modelo_prova');
+    },
+    criarModelo(payload) {
+        return request('/api/modelo_prova', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+    },
+    atualizarModelo(id, payload) {
+        return request(`/api/modelo_prova/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        });
+    },
+    removerModelo(id) {
+        return request(`/api/modelo_prova/${id}`, { method: 'DELETE' });
+    },
 
     /* ---- Pergunta: /api/pergunta (singular!) ----
      * OBS: o backend também não tem filtro por query params no GET —
@@ -210,17 +243,18 @@ const Api = {
     },
 
     /* ---- ProvaGerada: /api/prova_gerada ----
-     * OBS: o endpoint de geração usa @RequestParam (classId, subjectId,
-     * termId), não @RequestBody — por isso vai via query string, não JSON.
+     * A geração agora recebe um JSON no corpo: { classeId, disciplinaId,
+     * trimestre, modelo } — o modelo é o layout (MODELO_1/2/3).
      */
-    gerarProva({ classeId, disciplinaId, trimestre }) {
-        const params = new URLSearchParams({
-            classId: classeId,
-            subjectId: disciplinaId,
-            termId: trimestre,
-        });
-        return request(`/api/prova_gerada/generate?${params.toString()}`, {
+    gerarProva({ classeId, disciplinaId, trimestre, modelo }) {
+        return request('/api/prova_gerada/generate', {
             method: 'POST',
+            body: JSON.stringify({
+                classeId: Number(classeId),
+                disciplinaId: Number(disciplinaId),
+                trimestre,
+                modelo,
+            }),
         });
     },
 };

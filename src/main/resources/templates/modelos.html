@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modelos de prova · Gerador de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Modelos de prova', 'Defina a estrutura (seções) e o layout de cada prova')}"></div>
+
+    <div class="content">
+        <div class="card">
+            <div class="card__header">
+                <h2>Modelos cadastrados</h2>
+                <button class="btn btn-primary btn-sm" onclick="abrirModalModelo()">
+                    ＋ Novo modelo
+                </button>
+            </div>
+
+            <p style="color:var(--text-muted);margin-top:0;font-size:.85rem">
+                Cada modelo combina turma + disciplina + trimestre e define quantas perguntas
+                de cada tipo/nível sortear. O layout (Clássico, Moderno ou Compacto) é escolhido
+                na hora de gerar a prova.
+            </p>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Classe</th>
+                        <th>Disciplina</th>
+                        <th>Trimestre</th>
+                        <th>Layout</th>
+                        <th>Seções</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="modelosTableBody">
+                    <tr><td colspan="8" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="modelosEmpty" class="empty-state" style="display:none">
+                <div class="emoji"></div>
+                Nenhum modelo cadastrado. Crie um modelo para gerar provas.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Modelo (novo/edição) -->
+<div class="modal-overlay" id="modalModelo">
+    <div class="modal modal-lg">
+        <div class="modal__header">
+            <h3 id="modeloModalTitulo">Novo modelo de prova</h3>
+            <button class="modal__close" onclick="closeModal('modalModelo')">&times;</button>
+        </div>
+        <form id="formModelo">
+            <input type="hidden" id="modeloId">
+            <div class="modal__body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modeloNome">Nome do modelo</label>
+                        <input type="text" id="modeloNome" placeholder="Ex: Prova trimestral — Matemática" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modeloTemplate">Layout</label>
+                        <select id="modeloTemplate" required></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modeloClasse">Classe</label>
+                        <select id="modeloClasse" required><option value="">Selecione...</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modeloDisciplina">Disciplina</label>
+                        <select id="modeloDisciplina" required><option value="">Selecione...</option></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modeloTrimestre">Trimestre</label>
+                        <select id="modeloTrimestre" required><option value="">Selecione...</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label style="margin-top:22px">
+                            <input type="checkbox" id="modeloAtivo" checked style="width:auto"> Modelo ativo
+                        </label>
+                    </div>
+                </div>
+
+                <hr class="section-divider">
+
+                <div class="form-group">
+                    <label>Seções da prova <span class="hint">— cada seção sorteia N perguntas de um tipo/nível</span></label>
+                    <div id="secoesList"></div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="addSecaoRow()">＋ Adicionar seção</button>
+                </div>
+                <div class="form-error" id="modeloErro"></div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalModelo')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar modelo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
+<div th:replace="~{fragments/layout :: toastContainer}"></div>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+<script th:inline="javascript">
+    window.MODELOS = /*[[${modelos}]]*/ [];
+    window.CLASSES = /*[[${classes}]]*/ [];
+    window.DISCIPLINAS = /*[[${disciplinas}]]*/ [];
+</script>
+<script th:src="@{/js/modelos.js}"></script>
+
+</body>
+</html>

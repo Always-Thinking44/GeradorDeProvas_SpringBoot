@@ -2,7 +2,6 @@ package com.prova.gerador_provas.model;
 import com.prova.gerador_provas.enums.Trimestre;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "temas")

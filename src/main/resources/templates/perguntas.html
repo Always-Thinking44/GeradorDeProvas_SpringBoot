@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Perguntas · Gerador de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Perguntas', 'Banco de perguntas — cadastre novas pela página da turma')}"></div>
+
+    <div class="content">
+        <div class="card">
+            <div class="card__header">
+                <h2>Banco de perguntas</h2>
+                <a class="btn btn-outline btn-sm" href="/classes">Cadastrar pela turma</a>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-bar">
+                <div class="filter-field">
+                    <label for="filtroClasse">Classe</label>
+                    <select id="filtroClasse"><option value="">Todas</option></select>
+                </div>
+                <div class="filter-field">
+                    <label for="filtroDisciplina">Disciplina</label>
+                    <select id="filtroDisciplina"><option value="">Todas</option></select>
+                </div>
+                <div class="filter-field">
+                    <label for="filtroTrimestre">Trimestre</label>
+                    <select id="filtroTrimestre"><option value="">Todos</option></select>
+                </div>
+                <div class="filter-field">
+                    <button class="btn btn-outline btn-sm" id="btnLimparFiltros">Limpar filtros</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Enunciado</th>
+                        <th>Classe</th>
+                        <th>Disciplina</th>
+                        <th>Trimestre</th>
+                        <th>Dificuldade</th>
+                        <th>Tipo</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="perguntasTableBody">
+                    <tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="perguntasEmpty" class="empty-state" style="display:none">
+                <div class="emoji"></div>
+                Nenhuma pergunta encontrada para os filtros selecionados.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
+<div th:replace="~{fragments/layout :: toastContainer}"></div>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+<script th:inline="javascript">
+    window.PERGUNTAS = /*[[${perguntas}]]*/ [];
+    window.CLASSES = /*[[${classes}]]*/ [];
+    window.DISCIPLINAS = /*[[${disciplinas}]]*/ [];
+</script>
+<script th:src="@{/js/perguntas.js}"></script>
+
+</body>
+</html>

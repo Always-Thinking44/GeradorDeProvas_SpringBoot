@@ -76,6 +76,13 @@ function preencherSelectsEnum() {
     ENUMS.tipoPergunta.forEach(op => {
         tipoSelect.insertAdjacentHTML('beforeend', `<option value="${op.value}">${op.label}</option>`);
     });
+
+    const modeloSelect = document.getElementById('gerarProvaModelo');
+    if (modeloSelect) {
+        ENUMS.modeloTemplate.forEach(op => {
+            modeloSelect.insertAdjacentHTML('beforeend', `<option value="${op.value}">${op.label}</option>`);
+        });
+    }
 }
 
 function labelDoEnum(lista, value) {
@@ -588,9 +595,15 @@ async function onSubmitGerarProva(e) {
 
     const disciplinaId = document.getElementById('gerarProvaDisciplina').value;
     const trimestre = document.getElementById('gerarProvaTrimestre').value;
+    const modelo = document.getElementById('gerarProvaModelo').value;
 
     if (!disciplinaId || !trimestre) {
         erro.textContent = 'Selecione a disciplina e o trimestre.';
+        erro.style.display = 'block';
+        return;
+    }
+    if (!modelo) {
+        erro.textContent = 'Selecione o modelo de prova.';
         erro.style.display = 'block';
         return;
     }
@@ -598,7 +611,7 @@ async function onSubmitGerarProva(e) {
     const btn = e.target.querySelector('button[type=submit]');
     btn.disabled = true;
     try {
-        const prova = await Api.gerarProva({ classeId: CLASSE_ID, disciplinaId, trimestre });
+        const prova = await Api.gerarProva({ classeId: CLASSE_ID, disciplinaId, trimestre, modelo });
         toast('Prova gerada com sucesso!', 'success');
         closeModal('modalGerarProva');
         if (prova?.id) {

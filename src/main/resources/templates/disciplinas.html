@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Disciplinas · Gerador de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Disciplinas', 'Disciplinas globais — as turmas vinculam-se a elas')}"></div>
+
+    <div class="content">
+        <div class="card">
+            <div class="card__header">
+                <h2>Disciplinas cadastradas</h2>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modalNovaDisciplina')">
+                    ＋ Nova disciplina
+                </button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${disciplinas}">
+                        <td th:text="${d.nome}">Disciplina</td>
+                        <td>
+                            <button class="btn btn-danger-ghost btn-sm" th:attr="data-id=${d.id}, data-nome=${d.nome}" onclick="removerDisciplina(this.dataset.id, this.dataset.nome)">Excluir</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="disciplinasEmpty" class="empty-state" th:if="${#lists.isEmpty(disciplinas)}">
+                <div class="emoji"></div>
+                Nenhuma disciplina cadastrada.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nova Disciplina -->
+<div class="modal-overlay" id="modalNovaDisciplina">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Nova disciplina</h3>
+            <button class="modal__close" onclick="closeModal('modalNovaDisciplina')">&times;</button>
+        </div>
+        <form id="formNovaDisciplina">
+            <div class="modal__body">
+                <div class="form-group">
+                    <label for="novaDisciplinaNome">Nome da disciplina</label>
+                    <input type="text" id="novaDisciplinaNome" placeholder="Ex: Matemática" required>
+                    <div class="form-error" id="novaDisciplinaErro"></div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modalNovaDisciplina')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar disciplina</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
+<div th:replace="~{fragments/layout :: toastContainer}"></div>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+<script th:src="@{/js/disciplinas.js}"></script>
+
+</body>
+</html>

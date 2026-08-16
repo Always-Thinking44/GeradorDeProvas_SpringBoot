@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Provas geradas · Gerador de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Provas geradas', 'Visualize e baixe as provas em PDF, com ou sem gabarito')}"></div>
+
+    <div class="content">
+        <div class="card">
+            <div class="card__header">
+                <h2>Provas geradas</h2>
+                <a class="btn btn-primary btn-sm" href="/classes">＋ Gerar nova prova</a>
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Classe</th>
+                        <th>Disciplina</th>
+                        <th>Trimestre</th>
+                        <th>Layout</th>
+                        <th>Data</th>
+                        <th>Qtd.</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${provas}">
+                        <td style="font-weight:600" th:text="${p.codigo}">Código</td>
+                        <td th:text="${p.classeNome}">Classe</td>
+                        <td th:text="${p.disciplinaNome}">Disciplina</td>
+                        <td th:switch="${p.trimestre}">
+                            <span th:case="'PRIMEIRO'">1º Trimestre</span>
+                            <span th:case="'SEGUNDO'">2º Trimestre</span>
+                            <span th:case="'TERCEIRO'">3º Trimestre</span>
+                            <span th:case="*" th:text="${p.trimestre}"></span>
+                        </td>
+                        <td th:switch="${p.modelo}">
+                            <span th:case="'MODELO_1'">Modelo 1</span>
+                            <span th:case="'MODELO_2'">Modelo 2</span>
+                            <span th:case="'MODELO_3'">Modelo 3</span>
+                            <span th:case="*" th:text="${p.modelo}"></span>
+                        </td>
+                        <td th:text="${#temporals.format(p.dataGeracao, 'dd/MM/yyyy HH:mm')}">Data</td>
+                        <td th:text="${p.quantidadePerguntas}">0</td>
+                        <td th:text="${p.totalPontos} + ' pts'">0</td>
+                        <td style="white-space:nowrap">
+                            <a class="btn btn-outline btn-sm" th:href="@{/provas/{id}(id=${p.id})}">Ver prova</a>
+                            <a class="btn btn-outline btn-sm" th:href="@{/provas/{id}/gabarito(id=${p.id})}">Gabarito</a>
+                            <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/pdf(id=${p.id})}">PDF</a>
+                            <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/gabarito/pdf(id=${p.id})}">PDF gabarito</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty-state" th:if="${#lists.isEmpty(provas)}">
+                <div class="emoji"></div>
+                Nenhuma prova gerada ainda. Vá até uma turma e clique em "Gerar prova".
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
+<div th:replace="~{fragments/layout :: toastContainer}"></div>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
+
+</body>
+</html>

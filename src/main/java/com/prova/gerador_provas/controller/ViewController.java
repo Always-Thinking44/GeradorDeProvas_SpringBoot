@@ -1,5 +1,7 @@
 package com.prova.gerador_provas.controller;
 
+import com.prova.gerador_provas.enums.ModeloTemplate;
+import com.prova.gerador_provas.model.ProvaGerada;
 import com.prova.gerador_provas.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -60,6 +62,7 @@ public class ViewController {
     public String temas(Model model) {
         model.addAttribute("activePage",  "temas");
         model.addAttribute("temas",       temaService.findAll());
+        model.addAttribute("classes",     classeService.findAll());
         model.addAttribute("disciplinas", disciplinaService.findAll());
         return "temas";
     }
@@ -89,9 +92,27 @@ public class ViewController {
     @GetMapping("/provas")
     public String provas(Model model) {
         model.addAttribute("activePage",  "provas");
-        model.addAttribute("provas",      provaGeradaService.findAll());
-        model.addAttribute("classes",     classeService.findAll());
-        model.addAttribute("disciplinas", disciplinaService.findAll());
+        model.addAttribute("provas",      provaGeradaService.findAllResumo());
         return "provas";
+    }
+
+    /* ── Prova individual (tela) ── */
+    @GetMapping("/provas/{id}")
+    public String provaDetalhe(@PathVariable Long id, Model model) {
+        ProvaGerada prova = provaGeradaService.findById(id);
+        model.addAllAttributes(provaGeradaService.buildContext(prova, false, false));
+        return "exames/" + templatePath(prova.getTemplate());
+    }
+
+    /* ── Gabarito da prova (tela) ── */
+    @GetMapping("/provas/{id}/gabarito")
+    public String provaGabarito(@PathVariable Long id, Model model) {
+        ProvaGerada prova = provaGeradaService.findById(id);
+        model.addAllAttributes(provaGeradaService.buildContext(prova, true, false));
+        return "exames/" + templatePath(prova.getTemplate());
+    }
+
+    private String templatePath(ModeloTemplate template) {
+        return template == null ? "modelo1" : template.fileName();
     }
 }

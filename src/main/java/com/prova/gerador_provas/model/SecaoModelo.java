@@ -1,4 +1,5 @@
 package com.prova.gerador_provas.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import jakarta.persistence.*;
 import com.prova.gerador_provas.enums.NivelDificuldade;
@@ -19,6 +20,7 @@ public class SecaoModelo {
 
     private Integer quantidade;
 
+    @JsonIgnore
     @ManyToOne
     private ModeloProva modeloProva;
 

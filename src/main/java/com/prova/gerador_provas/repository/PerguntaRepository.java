@@ -6,6 +6,7 @@ import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.Pergunta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -31,22 +32,21 @@ public interface PerguntaRepository extends JpaRepository<Pergunta, Long> {
             Trimestre trimestreId
     );
 
-    @Query(value = """
-    SELECT * FROM perguntas
-    WHERE classe_id = :classeId
-      AND disciplina_id = :disciplinaId
-      AND trimestre = :trimestre
-      AND tipo_pergunta = :tipo
-      AND nivel_dificuldade = :nivel
-    ORDER BY RAND()
-    LIMIT :limit
-""", nativeQuery = true)
+    @Query("""
+            SELECT p FROM Pergunta p
+            WHERE p.ativo = true
+              AND p.classe.id = :classeId
+              AND p.disciplina.id = :disciplinaId
+              AND p.trimestre = :trimestre
+              AND p.tipoPergunta = :tipo
+              AND p.nivelDificuldade = :nivel
+            """)
     List<Pergunta> findRandomQuestions(
-            Long classeId,
-            Long disciplinaId,
-            String trimestre,
-            String tipo,
-            String nivel
+            @Param("classeId") Long classeId,
+            @Param("disciplinaId") Long disciplinaId,
+            @Param("trimestre") Trimestre trimestre,
+            @Param("tipo") TipoPergunta tipo,
+            @Param("nivel") NivelDificuldade nivel
     );
 
     List<Pergunta> findByClasseIdAndDisciplinaIdAndTrimestreAndTipoPergunta(
