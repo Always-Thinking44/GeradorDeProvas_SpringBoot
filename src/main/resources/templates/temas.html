@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Temas · Gerador de Provas</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -17,7 +19,8 @@
             <div class="card__header">
                 <h2>Temas cadastrados</h2>
                 <button class="btn btn-primary btn-sm" onclick="openModal('modalNovoTema')">
-                    ＋ Novo tema
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Novo tema
                 </button>
             </div>
 
@@ -38,9 +41,9 @@
                         <td th:text="${t.disciplina?.nome ?: '—'}">Disciplina</td>
                         <td th:text="${t.classe?.nome ?: '—'}">Classe</td>
                         <td th:switch="${t.trimestre}">
-                            <span th:case="'PRIMEIRO'">1º Trimestre</span>
-                            <span th:case="'SEGUNDO'">2º Trimestre</span>
-                            <span th:case="'TERCEIRO'">3º Trimestre</span>
+                            <span class="badge badge-teal" th:case="'PRIMEIRO'">1º Trimestre</span>
+                            <span class="badge badge-teal" th:case="'SEGUNDO'">2º Trimestre</span>
+                            <span class="badge badge-teal" th:case="'TERCEIRO'">3º Trimestre</span>
                         </td>
                         <td>
                             <button class="btn btn-danger-ghost btn-sm" th:attr="data-id=${t.id}, data-nome=${t.nome}" onclick="removerTema(this.dataset.id, this.dataset.nome)">Excluir</button>
@@ -50,7 +53,9 @@
                 </table>
             </div>
             <div class="empty-state" th:if="${#lists.isEmpty(temas)}">
-                <div class="emoji"></div>
+                <div class="emoji">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                </div>
                 Nenhum tema cadastrado.
             </div>
         </div>

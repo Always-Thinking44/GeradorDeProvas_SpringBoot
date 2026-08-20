@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title th:text="${classe.nome} + ' · Gerador de Provas'">Classe</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body th:attr="data-classe-id=${classe.id}">
 
@@ -25,10 +27,12 @@
                 <h2>Disciplinas</h2>
                 <div style="display:flex;gap:10px">
                     <button class="btn btn-outline btn-sm" id="btnNovoTemaDisciplinas" disabled>
-                        ＋ Novo tema
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Novo tema
                     </button>
                     <button class="btn btn-primary btn-sm" onclick="openModal('modalNovaDisciplina')">
-                        ＋ Nova disciplina
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nova disciplina
                     </button>
                 </div>
             </div>
@@ -38,7 +42,9 @@
                 <span style="color:var(--text-muted);font-size:.85rem">Carregando disciplinas...</span>
             </div>
             <div id="disciplinasEmpty" class="empty-state" style="display:none">
-                <div class="emoji"></div>
+                <div class="emoji">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </div>
                 Nenhuma disciplina cadastrada nesta classe ainda.<br>
                 Cadastre a primeira disciplina para poder criar perguntas.
             </div>
@@ -50,10 +56,12 @@
                 <h2>Perguntas</h2>
                 <div style="display:flex;gap:10px">
                     <button class="btn btn-outline btn-sm" id="btnGerarProva" disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         Gerar prova
                     </button>
                     <button class="btn btn-primary btn-sm" id="btnNovaPergunta" disabled>
-                        ＋ Nova pergunta
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nova pergunta
                     </button>
                 </div>
             </div>
@@ -73,7 +81,10 @@
                     </select>
                 </div>
                 <div class="filter-field">
-                    <button class="btn btn-outline btn-sm" id="btnLimparFiltros">Limpar filtros</button>
+                    <button class="btn btn-outline btn-sm" id="btnLimparFiltros">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Limpar filtros
+                    </button>
                 </div>
             </div>
 
@@ -96,7 +107,9 @@
                 </table>
             </div>
             <div id="perguntasEmpty" class="empty-state" style="display:none">
-                <div class="emoji"></div>
+                <div class="emoji">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
                 Nenhuma pergunta encontrada para os filtros selecionados.
             </div>
         </div>
@@ -183,7 +196,10 @@
                         <select id="perguntaTema" required disabled style="flex:1">
                             <option value="">Selecione a disciplina...</option>
                         </select>
-                        <button type="button" class="btn btn-outline btn-sm" id="btnNovoTema" disabled>＋ Novo tema</button>
+                        <button type="button" class="btn btn-outline btn-sm" id="btnNovoTema" disabled>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Novo tema
+                        </button>
                     </div>
                 </div>
 
@@ -204,7 +220,10 @@
                     <div class="form-group">
                         <label>Respostas <span class="hint">— marque a(s) correta(s)</span></label>
                         <div id="respostasList"></div>
-                        <button type="button" class="btn btn-outline btn-sm" id="btnAddResposta">＋ Adicionar resposta</button>
+                        <button type="button" class="btn btn-outline btn-sm" id="btnAddResposta">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Adicionar resposta
+                        </button>
                     </div>
                 </div>
                 <div id="respostasDesenvolvimentoMsg" class="empty-state" style="display:none;padding:16px">
@@ -305,7 +324,7 @@
         </div>
         <form id="formGerarProva">
             <div class="modal__body">
-                <p style="color:var(--text-muted);margin-top:0">
+                <p style="color:var(--text-muted);margin-top:0;line-height:1.5">
                     Selecione a disciplina, o trimestre e o modelo de layout para gerar
                     a prova a partir do modelo de seções cadastrado.
                 </p>
@@ -332,7 +351,10 @@
             </div>
             <div class="modal__footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modalGerarProva')">Cancelar</button>
-                <button type="submit" class="btn btn-success">Gerar prova</button>
+                <button type="submit" class="btn btn-success">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Gerar prova
+                </button>
             </div>
         </form>
     </div>

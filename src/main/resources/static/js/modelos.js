@@ -17,31 +17,37 @@ function labelTemplate(v) {
 }
 
 function renderModelos() {
-    const tbody = document.getElementById('modelosTableBody');
+    const grid = document.getElementById('modelosGrid');
     const empty = document.getElementById('modelosEmpty');
     const modelos = window.MODELOS || [];
 
     if (modelos.length === 0) {
-        tbody.innerHTML = '';
+        grid.innerHTML = '';
         empty.style.display = 'block';
         return;
     }
     empty.style.display = 'none';
 
-    tbody.innerHTML = modelos.map(m => `
-    <tr>
-      <td style="font-weight:600">${escapeHtml(m.nome)}</td>
-      <td>${escapeHtml(m.classe?.nome || '—')}</td>
-      <td>${escapeHtml(m.disciplina?.nome || '—')}</td>
-      <td>${labelTrimestre(m.trimestre)}</td>
-      <td><span class="badge badge-purple">${labelTemplate(m.template)}</span></td>
-      <td>${(m.secoes || []).length}</td>
-      <td>${m.ativo ? '<span class="badge badge-green">Ativo</span>' : '<span class="badge badge-gray">Inativo</span>'}</td>
-      <td style="white-space:nowrap">
+    grid.innerHTML = modelos.map(m => `
+    <div class="modelo-card">
+      <div class="modelo-card__header">
+        <div class="modelo-card__title">${escapeHtml(m.nome)}</div>
+        ${m.ativo ? '<span class="badge badge-green">Ativo</span>' : '<span class="badge badge-gray">Inativo</span>'}
+      </div>
+      <div class="modelo-card__meta">
+        <span class="badge badge-blue">${escapeHtml(m.classe?.nome || '—')}</span>
+        <span class="badge badge-teal">${escapeHtml(m.disciplina?.nome || '—')}</span>
+        <span class="badge badge-purple">${labelTrimestre(m.trimestre)}</span>
+        <span class="badge badge-orange">${labelTemplate(m.template)}</span>
+      </div>
+      <div class="modelo-card__sections">
+        ${(m.secoes || []).length} seção(ões) definida(s)
+      </div>
+      <div class="modelo-card__actions">
         <button class="btn btn-outline btn-sm" onclick="abrirModalModelo(${m.id})">Editar</button>
         <button class="btn btn-danger-ghost btn-sm" onclick="removerModelo(${m.id})">Excluir</button>
-      </td>
-    </tr>
+      </div>
+    </div>
   `).join('');
 }
 

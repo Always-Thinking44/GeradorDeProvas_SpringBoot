@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Perguntas · Gerador de Provas</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -16,7 +18,10 @@
         <div class="card">
             <div class="card__header">
                 <h2>Banco de perguntas</h2>
-                <a class="btn btn-outline btn-sm" href="/classes">Cadastrar pela turma</a>
+                <a class="btn btn-outline btn-sm" href="/classes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Cadastrar pela turma
+                </a>
             </div>
 
             <!-- Filtros -->
@@ -34,7 +39,10 @@
                     <select id="filtroTrimestre"><option value="">Todos</option></select>
                 </div>
                 <div class="filter-field">
-                    <button class="btn btn-outline btn-sm" id="btnLimparFiltros">Limpar filtros</button>
+                    <button class="btn btn-outline btn-sm" id="btnLimparFiltros">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Limpar filtros
+                    </button>
                 </div>
             </div>
 
@@ -58,7 +66,9 @@
                 </table>
             </div>
             <div id="perguntasEmpty" class="empty-state" style="display:none">
-                <div class="emoji"></div>
+                <div class="emoji">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
                 Nenhuma pergunta encontrada para os filtros selecionados.
             </div>
         </div>

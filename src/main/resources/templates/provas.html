@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Provas geradas · Gerador de Provas</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -16,57 +18,62 @@
         <div class="card">
             <div class="card__header">
                 <h2>Provas geradas</h2>
-                <button class="btn btn-primary btn-sm" id="btnGerarProva">＋ Gerar nova prova</button>
+                <button class="btn btn-primary btn-sm" id="btnGerarProva">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Gerar nova prova
+                </button>
             </div>
 
-            <div class="table-wrap">
-                <table class="data-table">
-                    <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Classe</th>
-                        <th>Disciplina</th>
-                        <th>Trimestre</th>
-                        <th>Layout</th>
-                        <th>Data</th>
-                        <th>Qtd.</th>
-                        <th>Total</th>
-                        <th>Ações</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="p : ${provas}">
-                        <td style="font-weight:600" th:text="${p.codigo}">Código</td>
-                        <td th:text="${p.classeNome}">Classe</td>
-                        <td th:text="${p.disciplinaNome}">Disciplina</td>
-                        <td th:switch="${p.trimestre}">
+            <div class="provas-grid">
+                <div class="prova-card" th:each="p : ${provas}">
+                    <div class="prova-card__header">
+                        <span class="prova-card__code" th:text="${p.codigo}">Código</span>
+                        <span class="badge badge-teal" th:switch="${p.modelo}">
+                            <span th:case="'MODELO_1'">Clássico</span>
+                            <span th:case="'MODELO_2'">Moderno</span>
+                            <span th:case="'MODELO_3'">Compacto</span>
+                            <span th:case="*" th:text="${p.modelo}"></span>
+                        </span>
+                    </div>
+                    <dl class="prova-card__info">
+                        <dt>Classe</dt>
+                        <dd th:text="${p.classeNome}">—</dd>
+                        <dt>Disciplina</dt>
+                        <dd th:text="${p.disciplinaNome}">—</dd>
+                        <dt>Trimestre</dt>
+                        <dd th:switch="${p.trimestre}">
                             <span th:case="'PRIMEIRO'">1º Trimestre</span>
                             <span th:case="'SEGUNDO'">2º Trimestre</span>
                             <span th:case="'TERCEIRO'">3º Trimestre</span>
                             <span th:case="*" th:text="${p.trimestre}"></span>
-                        </td>
-                        <td th:switch="${p.modelo}">
-                            <span th:case="'MODELO_1'">Modelo 1</span>
-                            <span th:case="'MODELO_2'">Modelo 2</span>
-                            <span th:case="'MODELO_3'">Modelo 3</span>
-                            <span th:case="*" th:text="${p.modelo}"></span>
-                        </td>
-                        <td th:text="${#temporals.format(p.dataGeracao, 'dd/MM/yyyy HH:mm')}">Data</td>
-                        <td th:text="${p.quantidadePerguntas}">0</td>
-                        <td th:text="${p.totalPontos} + ' pts'">0</td>
-                        <td style="white-space:nowrap">
-                            <a class="btn btn-outline btn-sm" th:href="@{/provas/{id}(id=${p.id})}">Ver prova</a>
-                            <a class="btn btn-outline btn-sm" th:href="@{/provas/{id}/gabarito(id=${p.id})}">Gabarito</a>
-                            <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/pdf(id=${p.id})}">PDF</a>
-                            <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/gabarito/pdf(id=${p.id})}">PDF gabarito</a>
-                            <button class="btn btn-danger-ghost btn-sm" th:onclick="'removerProvaGerada(' + ${p.id} + ')'">Excluir</button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                        </dd>
+                        <dt>Data</dt>
+                        <dd th:text="${#temporals.format(p.dataGeracao, 'dd/MM/yyyy HH:mm')}">—</dd>
+                        <dt>Perguntas</dt>
+                        <dd th:text="${p.quantidadePerguntas}">0</dd>
+                        <dt>Total</dt>
+                        <dd th:text="${p.totalPontos} + ' pts'">0 pts</dd>
+                    </dl>
+                    <div class="prova-card__actions">
+                        <a class="btn btn-outline btn-sm" th:href="@{/provas/{id}(id=${p.id})}">Ver prova</a>
+                        <a class="btn btn-outline btn-sm" th:href="@{/provas/{id}/gabarito(id=${p.id})}">Gabarito</a>
+                        <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/pdf(id=${p.id})}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            PDF
+                        </a>
+                        <a class="btn btn-success btn-sm" th:href="@{/api/prova_gerada/{id}/gabarito/pdf(id=${p.id})}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            PDF gabarito
+                        </a>
+                        <button class="btn btn-danger-ghost btn-sm" th:onclick="'removerProvaGerada(' + ${p.id} + ')'">Excluir</button>
+                    </div>
+                </div>
             </div>
+
             <div class="empty-state" th:if="${#lists.isEmpty(provas)}">
-                <div class="emoji"></div>
+                <div class="emoji">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
                 Nenhuma prova gerada ainda. Clique em "Gerar nova prova" para começar.
             </div>
         </div>
@@ -84,7 +91,7 @@
         </div>
         <form id="formGerarProva">
             <div class="modal__body">
-                <p style="color:var(--text-muted);margin-top:0">
+                <p style="color:var(--text-muted);margin-top:0;line-height:1.5">
                     Selecione a classe, disciplina, trimestre e modelo de layout para gerar
                     a prova a partir do modelo de seções cadastrado.
                 </p>
