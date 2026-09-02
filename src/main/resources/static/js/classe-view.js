@@ -11,6 +11,17 @@ let filtroDisciplinaAtiva = '';
 let respostaIdCounter = 0;
 
 /* -------------------------------------------------------------------------
+ * Último contexto de pergunta (salvo em sessionStorage)
+ * Mantém disciplina, trimestre, nível e tipo entre criações consecutivas
+ * ---------------------------------------------------------------------- */
+function salvarContextoPergunta(ctx) {
+    try { sessionStorage.setItem('perguntaContexto', JSON.stringify(ctx)); } catch {}
+}
+function carregarContextoPergunta() {
+    try { return JSON.parse(sessionStorage.getItem('perguntaContexto') || '{}'); } catch { return {}; }
+}
+
+/* -------------------------------------------------------------------------
  * Inicialização
  * ---------------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -44,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('btnAddResposta').addEventListener('click', () => addRespostaRow());
 
         document.getElementById('btnNovaPergunta').addEventListener('click', () => {
-            resetFormNovaPergunta();
+            resetFormNovaPergunta(montarContextoParaNovaPergunta());
             document.querySelector('#modalNovaPergunta h3').textContent = 'Nova pergunta';
             openModal('modalNovaPergunta');
         });
@@ -466,7 +477,7 @@ async function editarPergunta(id) {
 /* -------------------------------------------------------------------------
  * Modal: Nova Pergunta — respostas dinâmicas
  * ---------------------------------------------------------------------- */
-function resetFormNovaPergunta() {
+function resetFormNovaPergunta(ctx = {}) {
     document.getElementById('formNovaPergunta').reset();
     document.getElementById('perguntaEditId').value = '';
     document.getElementById('novaPerguntaErro').style.display = 'none';
@@ -477,7 +488,39 @@ function resetFormNovaPergunta() {
     addRespostaRow();
     document.getElementById('respostasSection').style.display = 'block';
     document.getElementById('respostasDesenvolvimentoMsg').style.display = 'none';
-    onPerguntaDisciplinaChange(); // reseta/desabilita o select de tema
+
+    if (ctx.disciplinaId) document.getElementById('perguntaDisciplina').value = ctx.disciplinaId;
+    if (ctx.trimestre) document.getElementById('perguntaTrimestre').value = ctx.trimestre;
+    if (ctx.nivelDificuldade) document.getElementById('perguntaNivel').value = ctx.nivelDificuldade;
+    if (ctx.tipoPergunta) document.getElementById('perguntaTipo').value = ctx.tipoPergunta;
+    if (ctx.pontuacao) document.getElementById('perguntaPontuacao').value = ctx.pontuacao;
+
+    onPerguntaDisciplinaChange();
+
+    if (ctx.temaId) {
+        setTimeout(() => { document.getElementById('perguntaTema').value = ctx.temaId; }, 100);
+    }
+    if (ctx.tipoPergunta) {
+        onTipoPerguntaChange();
+    }
+}
+
+/* Monta o contexto pré-preenchido para o modal "Nova pergunta":
+   combina o último contexto salvo (sessionStorage) com os filtros ativos
+   da listagem (que têm prioridade quando preenchidos). */
+function montarContextoParaNovaPergunta() {
+    const salvo = carregarContextoPergunta();
+    const filtroDisciplina = document.getElementById('filtroDisciplina').value;
+    const filtroTrimestre = document.getElementById('filtroTrimestre').value;
+
+    return {
+        disciplinaId: filtroDisciplina || salvo.disciplinaId || '',
+        trimestre: filtroTrimestre || salvo.trimestre || '',
+        nivelDificuldade: salvo.nivelDificuldade || '',
+        tipoPergunta: salvo.tipoPergunta || '',
+        temaId: (filtroDisciplina ? '' : salvo.temaId) || '',
+        pontuacao: salvo.pontuacao || '',
+    };
 }
 
 function onTipoPerguntaChange() {
@@ -634,6 +677,14 @@ async function onSubmitNovaPergunta(e) {
             toast('Pergunta atualizada com sucesso!', 'success');
         } else {
             await Api.criarPergunta(payload);
+            salvarContextoPergunta({
+                disciplinaId: Number(disciplinaId),
+                trimestre,
+                nivelDificuldade,
+                tipoPergunta,
+                temaId: Number(temaId),
+                pontuacao: Number(pontuacao),
+            });
             toast('Pergunta cadastrada com sucesso!', 'success');
         }
         closeModal('modalNovaPergunta');
