@@ -54,43 +54,44 @@
 <body class="sheet-body">
 
   <!-- Barra de ações (não aparece no PDF) -->
-  <div class="toolbar" th:if="${!forPdf}">
+  <!--<div class="toolbar" th:if="${!forPdf}">
     <a href="/provas">← Voltar</a>
     <a th:href="${mostrarGabarito ? ('/provas/' + prova.id) : ('/provas/' + prova.id + '/gabarito')}"
        th:text="${mostrarGabarito ? 'Ver prova' : 'Ver gabarito'}">Ver gabarito</a>
     <a th:href="'/api/prova_gerada/' + ${prova.id} + '/pdf'">PDF da prova</a>
     <a th:href="'/api/prova_gerada/' + ${prova.id} + '/gabarito/pdf'">PDF do gabarito</a>
     <button type="button" onclick="window.print()">Imprimir</button>
-  </div>
+  </div> !-->
 
-  <div class="sheet">
-    <div class="cabecalho">
-      <div class="instituicao">Escola — Avaliação Trimestral</div>
-      <h1>Prova de <span th:text="${disciplinaNome}"></span></h1>
-      <div class="sub">
-        Classe: <strong th:text="${classeNome}"></strong>
-        <span> · </span>
-        <span th:text="${trimestreLabel}"></span>
-        <span> · </span>
-        <span th:text="${templateLabel}"></span>
+  <section>
+
+    <div>
+      <div style="text-align: center">
+        <img src="img.png" style="display: inline">
       </div>
-      <div class="meta" th:if="${!forPdf}">
-        Data: <span th:text="${dataLabel}"></span>
-        <span> · Total: </span>
-        <span th:text="${totalPontos} + ' pontos'"></span>
-      </div>
-      <table class="campos">
-        <tr>
-          <td>Nome: <span style="border-bottom:1px solid #333;display:inline-block;width:320px">&#160;</span></td>
-          <td>Nº: <span style="border-bottom:1px solid #333;display:inline-block;width:90px">&#160;</span></td>
-          <td>Turma: <span style="border-bottom:1px solid #333;display:inline-block;width:90px">&#160;</span></td>
-        </tr>
-      </table>
+
+      <p style="text-align:center">República de Angola <br>
+        Governo da Província de Luanda <br>
+        Direcção Municipal de Educação de Viana <br>
+        Colégio Publico nº 5108 Viana – Estalagem <br>
+        Prova Trimestral de <span th:text="${disciplinaNome}"></span></p>
     </div>
 
+    <div>
+      <div style="display: flex; justify-content: space-between; padding: 0px 100px">
+        <span th:text="${trimestreLabel}">g</span>
+        <strong th:text="${classeNome}">r</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 0px 100px">
+        <p>Duração: 90 minutos</p>
+        <p>Turno: Manhã</p>
+      </div>
+    </div>
+
+  </section>
+
     <p class="instrucoes">
-      Leia com atenção cada questão antes de responder. Para as questões de escolha múltipla,
-      marque com X a alternativa correta. Boa prova!
+      Lê atentamente a prova e responda com clareza as questões:
     </p>
 
     <div class="questoes">
