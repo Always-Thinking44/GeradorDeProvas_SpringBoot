@@ -39,7 +39,8 @@ public class ProvaGeradaController {
                 request.classeId(),
                 request.disciplinaId(),
                 request.trimestre(),
-                request.modelo()
+                request.modelo(),
+                request.modeloProvaId()
         );
     }
 

@@ -18,6 +18,10 @@ public class ModeloProvaService {
         return repository.findAll();
     }
 
+    public List<ModeloProva> findActive() {
+        return repository.findByAtivoTrue();
+    }
+
     public ModeloProva findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() ->

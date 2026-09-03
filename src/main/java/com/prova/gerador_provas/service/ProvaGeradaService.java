@@ -42,17 +42,30 @@ public class ProvaGeradaService {
             Long classId,
             Long subjectId,
             Trimestre trimestre,
-            ModeloTemplate template) {
+            ModeloTemplate template,
+            Long modeloProvaId) {
 
-        ModeloProva modelo = modeloRepository
-                .findAllByClasseIdAndDisciplinaIdAndTrimestreAndAtivoTrue(
-                        classId,
-                        subjectId,
-                        trimestre)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Nenhum modelo ativo cadastrado para esta classe, disciplina e trimestre."));
+        ModeloProva modelo;
+
+        if (modeloProvaId != null) {
+            modelo = modeloRepository.findById(modeloProvaId)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Modelo de prova não encontrado."));
+            if (!Boolean.TRUE.equals(modelo.getAtivo())) {
+                throw new IllegalArgumentException(
+                        "O modelo de prova selecionado não está ativo.");
+            }
+        } else {
+            modelo = modeloRepository
+                    .findAllByClasseIdAndDisciplinaIdAndTrimestreAndAtivoTrue(
+                            classId,
+                            subjectId,
+                            trimestre)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Nenhum modelo ativo cadastrado para esta classe, disciplina e trimestre."));
+        }
 
         ModeloTemplate templateUsado = template != null
                 ? template

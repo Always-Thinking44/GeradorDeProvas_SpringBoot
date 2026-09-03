@@ -203,6 +203,9 @@ const Api = {
     listarModelos() {
         return request('/api/modelo_prova');
     },
+    listarModelosAtivos() {
+        return request('/api/modelo_prova/ativos');
+    },
     criarModelo(payload) {
         return request('/api/modelo_prova', {
             method: 'POST',
@@ -252,7 +255,7 @@ const Api = {
      * A geração agora recebe um JSON no corpo: { classeId, disciplinaId,
      * trimestre, modelo } — o modelo é o layout (MODELO_1/2/3).
      */
-    gerarProva({ classeId, disciplinaId, trimestre, modelo }) {
+    gerarProva({ classeId, disciplinaId, trimestre, modelo, modeloProvaId }) {
         return request('/api/prova_gerada/generate', {
             method: 'POST',
             body: JSON.stringify({
@@ -260,6 +263,7 @@ const Api = {
                 disciplinaId: Number(disciplinaId),
                 trimestre,
                 modelo,
+                modeloProvaId: modeloProvaId ? Number(modeloProvaId) : null,
             }),
         });
     },

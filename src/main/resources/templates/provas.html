@@ -92,33 +92,39 @@
         <form id="formGerarProva">
             <div class="modal__body">
                 <p style="color:var(--text-muted);margin-top:0;line-height:1.5">
-                    Selecione a classe, disciplina, trimestre e modelo de layout para gerar
-                    a prova a partir do modelo de seções cadastrado.
+                    Selecione o modelo de prova cadastrado para gerar a prova.
                 </p>
                 <div class="form-group">
-                    <label for="gerarProvaClasse">Classe</label>
-                    <select id="gerarProvaClasse" required>
+                    <label for="gerarProvaModeloProva">Modelo de prova</label>
+                    <select id="gerarProvaModeloProva" required>
                         <option value="">Selecione...</option>
+                    </select>
+                    <div class="hint">Modelo de prova cadastrado com classe, disciplina, trimestre e seções.</div>
+                </div>
+                <div class="form-group">
+                    <label for="gerarProvaClasse">Classe</label>
+                    <select id="gerarProvaClasse" required disabled>
+                        <option value="">Preenchido automaticamente...</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="gerarProvaDisciplina">Disciplina</label>
                     <select id="gerarProvaDisciplina" required disabled>
-                        <option value="">Selecione a classe primeiro...</option>
+                        <option value="">Preenchido automaticamente...</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="gerarProvaTrimestre">Trimestre</label>
-                    <select id="gerarProvaTrimestre" required>
-                        <option value="">Selecione...</option>
+                    <select id="gerarProvaTrimestre" required disabled>
+                        <option value="">Preenchido automaticamente...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="gerarProvaModelo">Modelo de prova (layout)</label>
+                    <label for="gerarProvaModelo">Layout da prova</label>
                     <select id="gerarProvaModelo" required>
                         <option value="">Selecione...</option>
                     </select>
-                    <div class="hint">O modelo define a aparência (clássico, moderno ou compacto) da prova e do PDF.</div>
+                    <div class="hint">Define a aparência (clássico, moderno ou compacto) da prova e do PDF.</div>
                 </div>
                 <div class="form-error" id="gerarProvaErro"></div>
             </div>
@@ -136,16 +142,9 @@
 
 <script>
 (function () {
-    const ENUMS = window.ENUMS;
+    let modelosProva = [];
 
     function preencherSelectsEnum() {
-        ['gerarProvaTrimestre'].forEach(id => {
-            const select = document.getElementById(id);
-            if (!select) return;
-            ENUMS.trimestre.forEach(op => {
-                select.insertAdjacentHTML('beforeend', '<option value="' + op.value + '">' + op.label + '</option>');
-            });
-        });
         const modeloSelect = document.getElementById('gerarProvaModelo');
         if (modeloSelect) {
             ENUMS.modeloTemplate.forEach(op => {
@@ -154,42 +153,55 @@
         }
     }
 
-    async function carregarClasses() {
-        const select = document.getElementById('gerarProvaClasse');
+    async function carregarModelosProva() {
+        const select = document.getElementById('gerarProvaModeloProva');
         try {
-            const classes = await Api.listarClasses();
-            if (classes && classes.length > 0) {
-                classes.forEach(c => {
-                    select.insertAdjacentHTML('beforeend', '<option value="' + c.id + '">' + escapeHtml(c.nome) + '</option>');
+            modelosProva = await Api.listarModelosAtivos() || [];
+            if (modelosProva.length > 0) {
+                modelosProva.forEach(m => {
+                    const label = m.nome + ' — ' +
+                        (m.classe ? m.classe.nome : '?') + ' / ' +
+                        (m.disciplina ? m.disciplina.nome : '?') + ' / ' +
+                        (m.trimestre === 'PRIMEIRO' ? '1º Tri' : m.trimestre === 'SEGUNDO' ? '2º Tri' : '3º Tri');
+                    select.insertAdjacentHTML('beforeend', '<option value="' + m.id + '">' + escapeHtml(label) + '</option>');
                 });
             }
         } catch (err) {
-            console.error('Erro ao carregar classes:', err);
+            console.error('Erro ao carregar modelos de prova:', err);
         }
     }
 
-    async function onClasseChange() {
-        const classeId = document.getElementById('gerarProvaClasse').value;
+    function onModeloProvaChange() {
+        const modeloId = document.getElementById('gerarProvaModeloProva').value;
+        const classeSelect = document.getElementById('gerarProvaClasse');
         const discSelect = document.getElementById('gerarProvaDisciplina');
-        discSelect.innerHTML = '<option value="">Carregando...</option>';
-        discSelect.disabled = true;
+        const trimestreSelect = document.getElementById('gerarProvaTrimestre');
 
-        if (!classeId) {
-            discSelect.innerHTML = '<option value="">Selecione a classe primeiro...</option>';
+        if (!modeloId) {
+            classeSelect.innerHTML = '<option value="">Preenchido automaticamente...</option>';
+            classeSelect.disabled = true;
+            discSelect.innerHTML = '<option value="">Preenchido automaticamente...</option>';
+            discSelect.disabled = true;
+            trimestreSelect.innerHTML = '<option value="">Preenchido automaticamente...</option>';
+            trimestreSelect.disabled = true;
             return;
         }
 
-        try {
-            const disciplinas = await Api.listarDisciplinas(classeId) || [];
-            discSelect.innerHTML = '<option value="">Selecione...</option>';
-            disciplinas.forEach(d => {
-                discSelect.insertAdjacentHTML('beforeend', '<option value="' + d.id + '">' + escapeHtml(d.nome) + '</option>');
-            });
-            discSelect.disabled = false;
-        } catch (err) {
-            discSelect.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
-            console.error(err);
-        }
+        const modelo = modelosProva.find(m => String(m.id) === String(modeloId));
+        if (!modelo) return;
+
+        classeSelect.innerHTML = '<option value="' + modelo.classe.id + '">' + escapeHtml(modelo.classe.nome) + '</option>';
+        classeSelect.value = modelo.classe.id;
+        classeSelect.disabled = true;
+
+        discSelect.innerHTML = '<option value="' + modelo.disciplina.id + '">' + escapeHtml(modelo.disciplina.nome) + '</option>';
+        discSelect.value = modelo.disciplina.id;
+        discSelect.disabled = true;
+
+        const triLabel = modelo.trimestre === 'PRIMEIRO' ? '1º Trimestre' : modelo.trimestre === 'SEGUNDO' ? '2º Trimestre' : '3º Trimestre';
+        trimestreSelect.innerHTML = '<option value="' + modelo.trimestre + '">' + triLabel + '</option>';
+        trimestreSelect.value = modelo.trimestre;
+        trimestreSelect.disabled = true;
     }
 
     async function onSubmitGerarProva(e) {
@@ -197,18 +209,19 @@
         const erro = document.getElementById('gerarProvaErro');
         erro.style.display = 'none';
 
+        const modeloProvaId = document.getElementById('gerarProvaModeloProva').value;
         const classeId = document.getElementById('gerarProvaClasse').value;
         const disciplinaId = document.getElementById('gerarProvaDisciplina').value;
         const trimestre = document.getElementById('gerarProvaTrimestre').value;
         const modelo = document.getElementById('gerarProvaModelo').value;
 
-        if (!classeId || !disciplinaId || !trimestre) {
-            erro.textContent = 'Selecione a classe, disciplina e trimestre.';
+        if (!modeloProvaId) {
+            erro.textContent = 'Selecione o modelo de prova.';
             erro.style.display = 'block';
             return;
         }
         if (!modelo) {
-            erro.textContent = 'Selecione o modelo de prova.';
+            erro.textContent = 'Selecione o layout da prova.';
             erro.style.display = 'block';
             return;
         }
@@ -216,7 +229,7 @@
         const btn = e.target.querySelector('button[type=submit]');
         btn.disabled = true;
         try {
-            const prova = await Api.gerarProva({ classeId, disciplinaId, trimestre, modelo });
+            const prova = await Api.gerarProva({ classeId, disciplinaId, trimestre, modelo, modeloProvaId });
             toast('Prova gerada com sucesso!', 'success');
             closeModal('modalGerarProva');
             if (prova && prova.id) {
@@ -234,18 +247,24 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         preencherSelectsEnum();
-        carregarClasses();
+        carregarModelosProva();
 
         document.getElementById('btnGerarProva').addEventListener('click', function () {
             document.getElementById('formGerarProva').reset();
             document.getElementById('gerarProvaErro').style.display = 'none';
+            var classeSelect = document.getElementById('gerarProvaClasse');
+            classeSelect.innerHTML = '<option value="">Preenchido automaticamente...</option>';
+            classeSelect.disabled = true;
             var discSelect = document.getElementById('gerarProvaDisciplina');
-            discSelect.innerHTML = '<option value="">Selecione a classe primeiro...</option>';
+            discSelect.innerHTML = '<option value="">Preenchido automaticamente...</option>';
             discSelect.disabled = true;
+            var trimestreSelect = document.getElementById('gerarProvaTrimestre');
+            trimestreSelect.innerHTML = '<option value="">Preenchido automaticamente...</option>';
+            trimestreSelect.disabled = true;
             openModal('modalGerarProva');
         });
 
-        document.getElementById('gerarProvaClasse').addEventListener('change', onClasseChange);
+        document.getElementById('gerarProvaModeloProva').addEventListener('change', onModeloProvaChange);
         document.getElementById('formGerarProva').addEventListener('submit', onSubmitGerarProva);
     });
 

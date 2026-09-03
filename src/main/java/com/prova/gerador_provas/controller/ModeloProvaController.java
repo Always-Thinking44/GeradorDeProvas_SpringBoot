@@ -19,6 +19,11 @@ public class ModeloProvaController {
         return modeloProvaService.findAll();
     }
 
+    @GetMapping("/ativos")
+    public List<ModeloProva> getActiveExamModels() {
+        return modeloProvaService.findActive();
+    }
+
     @GetMapping("/{id}")
     public ModeloProva getExamModelById(@PathVariable Long id) {
         return modeloProvaService.findById(id);
