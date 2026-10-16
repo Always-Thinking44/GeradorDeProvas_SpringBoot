@@ -59,7 +59,8 @@ public class PdfService {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             ITextRenderer renderer = new ITextRenderer();
             renderer.getSharedContext().setPrint(true);
-            renderer.setDocumentFromString(html);
+            String baseUrl = getClass().getResource("/static/").toExternalForm();
+            renderer.setDocumentFromString(html, baseUrl);
             renderer.layout();
             renderer.createPDF(out);
             return out.toByteArray();
