@@ -441,15 +441,17 @@ function aplicarPermissoesInterface() {
     const userBox = document.getElementById('currentUserBox');
     if (userBox) {
         const roleLabel = user.role === 'ROLE_ADMIN' ? 'Administrador' : 'Professor';
+        const roleBadgeClass = user.role === 'ROLE_ADMIN' ? 'badge badge-purple' : 'badge badge-teal';
         userBox.innerHTML = `
-            <div style="text-align: right; margin-right: 12px;">
-                <div style="font-weight: 600; font-size: 0.9rem; color: #1e293b;">${escapeHtml(user.nome)}</div>
-                <div style="font-size: 0.75rem; color: #64748b;">
-                    <span style="display:inline-block; padding: 1px 6px; border-radius: 4px; font-weight: bold; background: ${user.role === 'ROLE_ADMIN' ? '#e0e7ff; color: #4338ca;' : '#dcfce7; color: #15803d;'}">${roleLabel}</span>
+            <div style="text-align: right; margin-right: 14px;">
+                <div style="font-weight: 600; font-size: 0.88rem; color: var(--text);">${escapeHtml(user.nome)}</div>
+                <div style="font-size: 0.72rem; margin-top: 2px;">
+                    <span class="${roleBadgeClass}">${roleLabel}</span>
                 </div>
             </div>
-            <button onclick="Auth.logout()" class="btn btn-outline btn-sm" title="Sair da conta" style="padding: 4px 8px;">
-                Sair
+            <button onclick="Auth.logout()" class="btn btn-outline btn-sm" title="Terminar sessão" style="height:34px; padding:0 12px; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <span>Sair</span>
             </button>
         `;
     }

@@ -136,7 +136,9 @@ function addSecaoRow(secao = {}) {
             <span style="font-size:0.75rem; color:#64748b;">Val:</span>
             <input type="number" step="0.5" min="0.5" max="20" class="secao-pontos" value="${secao.pontuacaoTotal || 5.0}" style="width:65px; flex:none;" oninput="atualizarSomaValores()"/>
         </div>
-        <button type="button" class="remove-resposta" title="Remover grupo" style="flex:none;">✕</button>
+        <button type="button" class="remove-resposta btn-danger-ghost" title="Remover grupo" style="flex:none; padding:4px 6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
     `;
 
     row.querySelector('.remove-resposta').addEventListener('click', () => {
@@ -161,11 +163,11 @@ function atualizarSomaValores() {
     if (Math.abs(soma - 20.0) < 0.05) {
         ind.style.background = '#dcfce7';
         ind.style.color = '#15803d';
-        ind.innerHTML = `✔ Total: <strong>${soma.toFixed(1)} / 20 Valores</strong> (Válido)`;
+        ind.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg> Total: <strong>${soma.toFixed(1)} / 20 Valores</strong> (Válido)`;
     } else {
         ind.style.background = '#fee2e2';
         ind.style.color = '#991b1b';
-        ind.innerHTML = `⚠ Total: <strong>${soma.toFixed(1)} / 20 Valores</strong> (Deve ser 20)`;
+        ind.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Total: <strong>${soma.toFixed(1)} / 20 Valores</strong> (Deve ser 20)`;
     }
 }
 

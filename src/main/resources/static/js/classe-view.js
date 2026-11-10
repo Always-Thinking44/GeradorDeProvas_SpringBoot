@@ -577,7 +577,7 @@ function addRespostaRow(texto = '', correta = false, bloqueada = false, opts = {
     <label class="correct-toggle">
       <input type="checkbox" ${correta ? 'checked' : ''}> Correta
     </label>`}
-    ${bloqueada || opts.esconderCorreta ? '' : '<button type="button" class="remove-resposta" title="Remover">✕</button>'}
+    ${bloqueada || opts.esconderCorreta ? '' : '<button type="button" class="remove-resposta btn-danger-ghost" title="Remover" style="padding:2px 6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'}
   `;
     row.querySelector('.remove-resposta')?.addEventListener('click', () => row.remove());
 

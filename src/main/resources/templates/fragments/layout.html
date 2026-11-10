@@ -90,7 +90,9 @@
 <header class="topbar" th:fragment="topbar(titulo, subtitulo)">
     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div>
-            <button id="mobileMenuBtn" class="btn btn-outline btn-sm" style="display:none">☰</button>
+            <button id="mobileMenuBtn" class="btn btn-outline btn-sm" style="display:none" aria-label="Abrir Menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
             <h1 th:text="${titulo}">Título</h1>
             <div class="subtitle" th:text="${subtitulo}">Subtítulo</div>
         </div>

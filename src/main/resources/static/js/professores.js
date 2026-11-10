@@ -44,25 +44,25 @@ function renderizarTabelaUsuarios(usuarios) {
         const isAdmin = u.role === 'ROLE_ADMIN';
         const roleLabel = isAdmin ? 'Administrador' : 'Professor';
         const roleBadge = isAdmin
-            ? `<span style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">${roleLabel}</span>`
-            : `<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">${roleLabel}</span>`;
+            ? `<span class="badge badge-purple">${roleLabel}</span>`
+            : `<span class="badge badge-teal">${roleLabel}</span>`;
 
         const statusBadge = u.ativo
-            ? `<span style="color:#16a34a; font-weight:600; font-size:0.8rem;">● Ativo</span>`
-            : `<span style="color:#dc2626; font-weight:600; font-size:0.8rem;">○ Inativo</span>`;
+            ? `<span class="badge badge-green">Ativo</span>`
+            : `<span class="badge badge-rose">Inativo</span>`;
 
         // Renderizar tags de turmas atribuídas
         let atribuicoesHtml = '';
         if (isAdmin) {
-            atribuicoesHtml = `<em style="color:#64748b; font-size:0.8rem;">Acesso total (Admin)</em>`;
+            atribuicoesHtml = `<span style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">Acesso total (Administrador)</span>`;
         } else if (u.atribuicoes && u.atribuicoes.length > 0) {
             atribuicoesHtml = u.atribuicoes.map(a => `
-                <span style="display:inline-block; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; margin:2px 3px 2px 0; font-size:0.75rem; color:#334155;">
-                    <strong>${escapeHtml(a.classeNome)}</strong> · ${escapeHtml(a.disciplinaNome)}
+                <span style="display:inline-block; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:4px; padding:2px 8px; margin:2px 4px 2px 0; font-size:0.75rem; color:#334155;">
+                    <strong style="color:var(--text);">${escapeHtml(a.classeNome)}</strong> · ${escapeHtml(a.disciplinaNome)}
                 </span>
             `).join('');
         } else {
-            atribuicoesHtml = `<span style="color:#94a3b8; font-style:italic; font-size:0.8rem;">Nenhuma turma atribuída</span>`;
+            atribuicoesHtml = `<span style="color:var(--text-muted); font-style:italic; font-size:0.8rem;">Nenhuma turma vinculada</span>`;
         }
 
         return `
@@ -76,13 +76,14 @@ function renderizarTabelaUsuarios(usuarios) {
                 <td style="text-align:right; white-space:nowrap;">
                     ${!isAdmin ? `
                         <button class="btn btn-outline btn-sm" onclick="abrirModalAtribuicoes(${u.id})" title="Gerenciar Turmas e Disciplinas">
-                            📚 Turmas
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            Turmas
                         </button>
                     ` : ''}
-                    <button class="btn btn-outline btn-sm" onclick="editarUsuario(${u.id})" title="Editar usuário">
-                        ✏️
+                    <button class="btn btn-outline btn-sm" onclick="editarUsuario(${u.id})" title="Editar utilizador">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="alternarStatus(${u.id}, ${!u.ativo})" title="${u.ativo ? 'Desativar' : 'Ativar'}">
+                    <button class="btn btn-outline btn-sm ${u.ativo ? 'btn-danger-ghost' : ''}" onclick="alternarStatus(${u.id}, ${!u.ativo})" title="${u.ativo ? 'Bloquear conta' : 'Reativar conta'}">
                         ${u.ativo ? 'Bloquear' : 'Ativar'}
                     </button>
                 </td>
@@ -219,8 +220,8 @@ async function renderizarListaAtribuicoes(professorId) {
                     <span style="font-weight:600; color:#1e293b; font-size:0.9rem;">${escapeHtml(a.classeNome)}</span>
                     <span style="color:#64748b; font-size:0.85rem;"> — ${escapeHtml(a.disciplinaNome)}</span>
                 </div>
-                <button type="button" class="btn btn-outline btn-sm" onclick="removerAtribuicao(${a.id})" style="color:#dc2626; border-color:#fca5a5; padding:2px 8px;" title="Remover atribuição">
-                    ✕ Desvincular
+                <button type="button" class="btn btn-outline btn-sm btn-danger-ghost" onclick="removerAtribuicao(${a.id})" style="padding:4px 10px;" title="Remover atribuição">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Desvincular
                 </button>
             </div>
         `).join('');

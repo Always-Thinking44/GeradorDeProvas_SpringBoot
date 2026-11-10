@@ -1,93 +1,105 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Professores & Acessos — Gerador de Provas</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <meta charset="UTF-8">
+    <title>Professores & Acessos · Gerador de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="app-layout">
-    <div th:replace="~{fragments/layout :: sidebar}"></div>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
 
-    <main class="main-content">
-        <div th:replace="~{fragments/layout :: topbar('Professores & Acessos', 'Gerenciamento de usuários e permissões de turmas e disciplinas')}"></div>
+<div class="main">
+    <div th:replace="~{fragments/layout :: topbar('Professores & Acessos', 'Gerenciamento de contas e permissões por turma e disciplina')}"></div>
 
-        <div class="content-body">
-            <div class="page-actions" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div class="content">
+        <div class="card">
+            <div class="card__header">
                 <div>
-                    <input type="text" id="filtroUsuario" placeholder="Buscar por nome ou e-mail..." class="form-control" style="width:280px; display:inline-block;"/>
+                    <h2>Contas de Utilizadores e Professores</h2>
+                    <p style="color:var(--text-muted);margin-top:2px;font-size:.82rem;">Defina a quais classes e disciplinas cada professor tem acesso para criar perguntas e gerar provas</p>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="openModal('modalNovoUsuario')">
-                    ＋ Novo Usuário / Professor
+                <button class="btn btn-primary btn-sm" onclick="abrirModalNovoUsuario()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Novo Utilizador
                 </button>
             </div>
 
-            <div class="card">
-                <div class="table-responsive">
-                    <table class="table" id="tabelaProfessores">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>E-mail</th>
-                            <th>Perfil</th>
-                            <th>Status</th>
-                            <th>Turmas & Disciplinas Atribuídas</th>
-                            <th style="text-align:right">Ações</th>
-                        </tr>
-                        </thead>
-                        <tbody id="tbodyProfessores">
-                        <tr>
-                            <td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">
-                                Carregando usuários...
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+            <div style="margin-bottom: 16px;">
+                <input type="text" id="filtroUsuario" placeholder="Filtrar por nome ou e-mail..." style="width: 300px; max-width: 100%;">
+            </div>
+
+            <div class="table-wrap">
+                <table class="data-table" id="tabelaProfessores">
+                    <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Perfil</th>
+                        <th>Estado</th>
+                        <th>Turmas & Disciplinas Atribuídas</th>
+                        <th style="text-align: right; width: 220px;">Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbodyProfessores">
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:32px; color:var(--text-muted);">
+                            A carregar utilizadores...
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="professoresEmpty" class="empty-state" style="display:none">
+                <div class="emoji">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
+                Nenhum utilizador encontrado.
             </div>
         </div>
-    </main>
+    </div>
 </div>
 
 <!-- ============================================================
-     MODAL: Novo / Editar Usuário
+     MODAL: Novo / Editar Utilizador
      ============================================================ -->
 <div class="modal-overlay" id="modalNovoUsuario">
     <div class="modal">
         <div class="modal__header">
-            <h3 id="modalUsuarioTitulo">Novo Usuário</h3>
+            <h3 id="modalUsuarioTitulo">Novo Utilizador</h3>
             <button class="modal__close" onclick="closeModal('modalNovoUsuario')">&times;</button>
         </div>
         <form id="formUsuario">
-            <input type="hidden" id="usuarioId"/>
+            <input type="hidden" id="usuarioId">
             <div class="modal__body">
                 <div class="form-group">
                     <label for="usuarioNome">Nome completo</label>
-                    <input type="text" id="usuarioNome" class="form-control" placeholder="Ex: Professor António Silva" required/>
+                    <input type="text" id="usuarioNome" placeholder="Ex: Professor António Silva" required>
                 </div>
                 <div class="form-group">
-                    <label for="usuarioEmail">E-mail</label>
-                    <input type="email" id="usuarioEmail" class="form-control" placeholder="exemplo@escola.com" required/>
+                    <label for="usuarioEmail">E-mail de acesso</label>
+                    <input type="email" id="usuarioEmail" placeholder="antonio.silva@escola.com" required>
                 </div>
                 <div class="form-group" id="grupoSenha">
-                    <label for="usuarioSenha">Senha</label>
-                    <input type="password" id="usuarioSenha" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6"/>
-                    <small style="color:#64748b; font-size:0.75rem;" id="ajudaSenha">Ao editar, deixe em branco para manter a senha atual.</small>
+                    <label for="usuarioSenha">Palavra-passe</label>
+                    <input type="password" id="usuarioSenha" placeholder="Mínimo 6 caracteres" minlength="6">
+                    <small style="color:var(--text-muted); font-size:0.75rem; display:none; margin-top:4px;" id="ajudaSenha">Ao editar, deixe em branco caso não queira alterar a palavra-passe atual.</small>
                 </div>
                 <div class="form-group">
                     <label for="usuarioRole">Perfil de Acesso</label>
-                    <select id="usuarioRole" class="form-control" required>
-                        <option value="ROLE_PROFESSOR">Professor (Acessa apenas turmas atribuídas)</option>
-                        <option value="ROLE_ADMIN">Administrador (Acesso irrestrito a todo o sistema)</option>
+                    <select id="usuarioRole" required>
+                        <option value="ROLE_PROFESSOR">Professor (Acesso restrito às turmas atribuídas)</option>
+                        <option value="ROLE_ADMIN">Administrador (Acesso total)</option>
                     </select>
                 </div>
+                <div class="form-error" id="usuarioErro"></div>
             </div>
             <div class="modal__footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modalNovoUsuario')">Cancelar</button>
-                <button type="submit" class="btn btn-primary" id="btnSalvarUsuario">Salvar Usuário</button>
+                <button type="submit" class="btn btn-primary" id="btnSalvarUsuario">Guardar Utilizador</button>
             </div>
         </form>
     </div>
@@ -97,42 +109,41 @@
      MODAL: Gerenciar Atribuições do Professor
      ============================================================ -->
 <div class="modal-overlay" id="modalAtribuicoes">
-    <div class="modal" style="max-width: 600px;">
+    <div class="modal" style="max-width: 620px;">
         <div class="modal__header">
             <h3>Turmas & Disciplinas do Professor</h3>
             <button class="modal__close" onclick="closeModal('modalAtribuicoes')">&times;</button>
         </div>
         <div class="modal__body">
-            <p id="professorAtribuicaoNome" style="font-weight:600; color:#1e293b; margin-bottom:14px; font-size:1rem;"></p>
+            <p id="professorAtribuicaoNome" style="font-weight:600; color:var(--text); margin-bottom:14px; font-size:0.95rem;"></p>
 
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px;">
-                <h4 style="font-size:0.85rem; color:#475569; text-transform:uppercase; margin-bottom:10px;">Atribuir Nova Turma</h4>
+            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; margin-bottom:20px;">
+                <div style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">Atribuir Nova Turma e Disciplina</div>
                 <form id="formNovaAtribuicao" style="display:flex; gap:10px; align-items:flex-end;">
-                    <input type="hidden" id="atribuicaoProfessorId"/>
+                    <input type="hidden" id="atribuicaoProfessorId">
                     <div style="flex:1;">
-                        <label style="font-size:0.8rem; display:block; margin-bottom:4px;">Classe / Turma</label>
-                        <select id="atribuicaoClasseSelect" class="form-control" required>
-                            <option value="">Selecione a classe...</option>
+                        <label style="font-size:0.78rem; display:block; margin-bottom:4px; font-weight:600;">Classe / Turma</label>
+                        <select id="atribuicaoClasseSelect" required>
+                            <option value="">Selecione...</option>
                             <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.nome}"></option>
                         </select>
                     </div>
                     <div style="flex:1;">
-                        <label style="font-size:0.8rem; display:block; margin-bottom:4px;">Disciplina</label>
-                        <select id="atribuicaoDisciplinaSelect" class="form-control" required>
-                            <option value="">Selecione a disciplina...</option>
+                        <label style="font-size:0.78rem; display:block; margin-bottom:4px; font-weight:600;">Disciplina</label>
+                        <select id="atribuicaoDisciplinaSelect" required>
+                            <option value="">Selecione...</option>
                             <option th:each="d : ${disciplinas}" th:value="${d.id}" th:text="${d.nome}"></option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
-                        ＋ Vincular
+                    <button type="submit" class="btn btn-primary btn-sm" style="height:38px; white-space:nowrap;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Vincular
                     </button>
                 </form>
             </div>
 
-            <h4 style="font-size:0.85rem; color:#475569; text-transform:uppercase; margin-bottom:10px;">Vínculos Atuais</h4>
-            <div id="listaAtribuicoesContainer" style="max-height:240px; overflow-y:auto;">
-                <!-- Preenchido dinamicamente via JS -->
-            </div>
+            <div style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Vínculos Ativos</div>
+            <div id="listaAtribuicoesContainer" style="max-height:220px; overflow-y:auto;"></div>
         </div>
         <div class="modal__footer">
             <button type="button" class="btn btn-outline" onclick="closeModal('modalAtribuicoes')">Fechar</button>
@@ -142,7 +153,7 @@
 
 <div th:replace="~{fragments/layout :: modalNovaClasse}"></div>
 <div th:replace="~{fragments/layout :: toastContainer}"></div>
-<th:block th:replace="~{fragments/layout :: scriptsComuns}"></th:block>
+<div th:replace="~{fragments/layout :: scriptsComuns}"></div>
 <script th:src="@{/js/professores.js}"></script>
 </body>
 </html>

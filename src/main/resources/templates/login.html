@@ -20,52 +20,44 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
-            padding: 24px;
-            color: #1e293b;
+            background: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.8) 0px, transparent 50%);
+            padding: 20px;
+            color: #0f172a;
         }
 
         .login-card {
             width: 100%;
-            max-width: 440px;
+            max-width: 400px;
             background: #ffffff;
-            border-radius: 16px;
-            padding: 40px 36px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #4f46e5, #06b6d4, #10b981);
+            border-radius: 14px;
+            padding: 38px 32px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
         .login-brand {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
         }
 
         .brand-icon-wrapper {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
             color: #ffffff;
-            border-radius: 16px;
+            border-radius: 12px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 14px;
-            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
         }
 
         .login-brand h1 {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: #0f172a;
             letter-spacing: -0.02em;
@@ -74,7 +66,7 @@
 
         .login-brand p {
             color: #64748b;
-            font-size: 0.9rem;
+            font-size: 0.86rem;
         }
 
         .form-group {
@@ -83,7 +75,7 @@
 
         .form-group label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 600;
             color: #334155;
             margin-bottom: 6px;
@@ -97,7 +89,7 @@
 
         .input-icon {
             position: absolute;
-            left: 14px;
+            left: 13px;
             color: #94a3b8;
             pointer-events: none;
             display: flex;
@@ -107,14 +99,15 @@
 
         .form-input {
             width: 100%;
-            padding: 12px 14px 12px 42px;
-            font-size: 0.95rem;
+            height: 44px;
+            padding: 10px 14px 10px 40px;
+            font-size: 0.9rem;
             color: #0f172a;
-            background: #f8fafc;
+            background: #ffffff;
             border: 1.5px solid #cbd5e1;
-            border-radius: 10px;
+            border-radius: 8px;
             outline: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
         }
 
         .form-input::placeholder {
@@ -123,134 +116,71 @@
 
         .form-input:hover {
             border-color: #94a3b8;
-            background: #ffffff;
         }
 
         .form-input:focus {
-            background: #ffffff;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
         }
 
         .error-box {
             display: none;
-            align-items: flex-start;
-            gap: 10px;
+            align-items: center;
+            gap: 9px;
             background: #fef2f2;
-            border: 1.5px solid #fecaca;
+            border: 1px solid #fecaca;
             color: #991b1b;
-            padding: 12px 14px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 0.82rem;
             line-height: 1.4;
-            animation: shake 0.3s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
         }
 
         .error-box svg {
             flex-shrink: 0;
-            margin-top: 1px;
+            color: #dc2626;
         }
 
         .btn-submit {
             width: 100%;
-            padding: 13px 20px;
-            font-size: 0.95rem;
+            height: 44px;
+            padding: 0 20px;
+            font-size: 0.9rem;
             font-weight: 600;
             color: #ffffff;
-            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            background: #0d9488;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 14px -1px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 2px 6px rgba(13, 148, 136, 0.3);
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            margin-top: 22px;
         }
 
         .btn-submit:hover {
-            background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
-            box-shadow: 0 6px 18px -1px rgba(79, 70, 229, 0.5);
-            transform: translateY(-1px);
+            background: #0f766e;
+            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.4);
         }
 
         .btn-submit:active {
-            transform: translateY(0);
+            background: #115e59;
         }
 
         .btn-submit:disabled {
             opacity: 0.65;
             cursor: not-allowed;
-            transform: none;
         }
 
-        .quick-access-box {
-            margin-top: 26px;
-            padding-top: 22px;
-            border-top: 1px dashed #e2e8f0;
-        }
-
-        .quick-access-box h4 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #64748b;
-            margin-bottom: 12px;
+        .login-footer {
+            margin-top: 24px;
             text-align: center;
-            font-weight: 600;
-        }
-
-        .quick-btns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .quick-btn {
-            padding: 10px 12px;
-            border: 1.5px solid #e2e8f0;
-            background: #f8fafc;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            color: #334155;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .quick-btn:hover {
-            background: #ffffff;
-            border-color: #4f46e5;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
-            transform: translateY(-1px);
-        }
-
-        .quick-btn .btn-role {
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #0f172a;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .quick-btn.admin:hover .btn-role { color: #4f46e5; }
-        .quick-btn.prof:hover .btn-role { color: #16a34a; }
-
-        .quick-btn .btn-email {
-            color: #64748b;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
+            color: #94a3b8;
         }
     </style>
 </head>
@@ -259,7 +189,7 @@
 <div class="login-card">
     <div class="login-brand">
         <div class="brand-icon-wrapper">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
                 <line x1="16" y1="13" x2="8" y2="13"/>
@@ -268,7 +198,7 @@
             </svg>
         </div>
         <h1>Gerador de Provas</h1>
-        <p>Acesse o painel escolar com sua conta</p>
+        <p>Introduza as suas credenciais para aceder</p>
     </div>
 
     <form id="formLogin">
@@ -276,20 +206,20 @@
             <label for="email">E-mail</label>
             <div class="input-wrapper">
                 <span class="input-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                         <polyline points="22,6 12,13 2,6"/>
                     </svg>
                 </span>
-                <input type="email" id="email" class="form-input" placeholder="seu.email@escola.com" required autocomplete="email"/>
+                <input type="email" id="email" class="form-input" placeholder="exemplo@escola.com" required autocomplete="email"/>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="senha">Senha</label>
+            <label for="senha">Palavra-passe</label>
             <div class="input-wrapper">
                 <span class="input-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
@@ -299,45 +229,29 @@
         </div>
 
         <div id="loginErro" class="error-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            <span id="mensagemErro">Usuário ou senha incorretos.</span>
+            <span id="mensagemErro">Credenciais inválidas. Verifique o e-mail e a palavra-passe.</span>
         </div>
 
         <button type="submit" id="btnLogin" class="btn-submit">
-            <span>Entrar no Sistema</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <span>Iniciar Sessão</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"/>
                 <polyline points="12 5 19 12 12 19"/>
             </svg>
         </button>
     </form>
 
-    <div class="quick-access-box">
-        <h4>Acesso Rápido de Teste</h4>
-        <div class="quick-btns">
-            <button type="button" class="quick-btn admin" onclick="preencherCredenciais('admin@escola.com', 'admin123')">
-                <span class="btn-role">👑 Administrador</span>
-                <span class="btn-email">admin@escola.com</span>
-            </button>
-            <button type="button" class="quick-btn prof" onclick="preencherCredenciais('professor@escola.com', 'prof123')">
-                <span class="btn-role">👨‍🏫 Professor</span>
-                <span class="btn-email">professor@escola.com</span>
-            </button>
-        </div>
+    <div class="login-footer">
+        Sistema de Avaliação & Geração de Provas
     </div>
 </div>
 
 <script>
-    function preencherCredenciais(email, senha) {
-        document.getElementById('email').value = email;
-        document.getElementById('senha').value = senha;
-        document.getElementById('formLogin').dispatchEvent(new Event('submit'));
-    }
-
     document.getElementById('formLogin').addEventListener('submit', async (e) => {
         e.preventDefault();
         const erroBox = document.getElementById('loginErro');
@@ -349,7 +263,7 @@
         const btn = document.getElementById('btnLogin');
 
         btn.disabled = true;
-        btn.querySelector('span').textContent = 'Autenticando...';
+        btn.querySelector('span').textContent = 'A verificar...';
 
         try {
             const res = await fetch('/api/auth/login', {
@@ -360,9 +274,9 @@
 
             if (!res.ok) {
                 const erroData = await res.json().catch(() => ({}));
-                let msg = erroData.message || 'Credenciais inválidas. Verifique seu e-mail e senha.';
+                let msg = erroData.message || 'Credenciais inválidas. Verifique o e-mail e a palavra-passe.';
                 if (msg.includes('lazily initialize') || msg.includes('Hibernate')) {
-                    msg = 'Erro interno de inicialização da conta. Tente novamente.';
+                    msg = 'Erro interno ao iniciar sessão. Tente novamente.';
                 }
                 throw new Error(msg);
             }
@@ -383,7 +297,7 @@
             erroBox.style.display = 'flex';
         } finally {
             btn.disabled = false;
-            btn.querySelector('span').textContent = 'Entrar no Sistema';
+            btn.querySelector('span').textContent = 'Iniciar Sessão';
         }
     });
 

@@ -88,7 +88,7 @@
             <li th:each="r, rs : ${q.respostas}" th:classappend="${mostrarGabarito and r.correta} ? 'correta'">
               <span class="letra" th:text="${r.letra} + ')'"></span>
               <span th:text="${r.descricao}"></span>
-              <span class="check" th:if="${mostrarGabarito and r.correta}" th:text="'✔ CORRETA'"></span>
+              <span class="check" th:if="${mostrarGabarito and r.correta}" th:text="'[CORRETA]'"></span>
             </li>
           </ul>
         </th:block>
