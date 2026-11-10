@@ -43,7 +43,8 @@ public class ProvaGeradaController {
                 request.disciplinaId(),
                 request.trimestre(),
                 request.modelo(),
-                request.modeloProvaId()
+                request.modeloProvaId(),
+                request.anoLectivo()
         );
         return ResponseEntity.ok(prova);
     }

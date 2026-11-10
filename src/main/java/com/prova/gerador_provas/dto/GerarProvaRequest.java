@@ -8,6 +8,7 @@ public record GerarProvaRequest(
         Long disciplinaId,
         Trimestre trimestre,
         ModeloTemplate modelo,
-        Long modeloProvaId
+        Long modeloProvaId,
+        String anoLectivo
 ) {
 }

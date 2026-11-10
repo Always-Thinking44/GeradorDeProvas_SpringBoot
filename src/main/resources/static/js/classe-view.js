@@ -733,6 +733,7 @@ async function onSubmitGerarProva(e) {
     const disciplinaId = document.getElementById('gerarProvaDisciplina').value;
     const trimestre = document.getElementById('gerarProvaTrimestre').value;
     const modelo = document.getElementById('gerarProvaModelo').value;
+    const anoLectivo = document.getElementById('gerarProvaAnoLectivo')?.value.trim() || '2025/2026';
 
     if (!disciplinaId || !trimestre) {
         erro.textContent = 'Selecione a disciplina e o trimestre.';
@@ -748,7 +749,7 @@ async function onSubmitGerarProva(e) {
     const btn = e.target.querySelector('button[type=submit]');
     btn.disabled = true;
     try {
-        const prova = await Api.gerarProva({ classeId: CLASSE_ID, disciplinaId, trimestre, modelo });
+        const prova = await Api.gerarProva({ classeId: CLASSE_ID, disciplinaId, trimestre, modelo, anoLectivo });
         toast('Prova gerada com sucesso!', 'success');
         closeModal('modalGerarProva');
         if (prova?.id) {

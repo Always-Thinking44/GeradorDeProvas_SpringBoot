@@ -26,6 +26,9 @@ public class ProvaGerada {
 
     private String nomeArquivo;
 
+    @Column(length = 20)
+    private String anoLectivo;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ModeloTemplate template = ModeloTemplate.MODELO_1;

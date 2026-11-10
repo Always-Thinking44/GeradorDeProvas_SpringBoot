@@ -2,151 +2,363 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/>
-  <title th:text="'Prova — ' + ${disciplinaNome}">Prova</title>
+  <title th:text="(${mostrarGabarito} ? 'Chave da Prova — ' : 'Prova — ') + ${disciplinaNome}">Prova</title>
   <style>
-    @page { size: A4; margin: 1.6cm 1.8cm; }
+    @page { size: A4; margin: 1.4cm 1.6cm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Georgia, 'Times New Roman', serif; font-size: 11.5pt; color: #1a1a1a; line-height: 1.45; }
+    body {
+      font-family: 'Times New Roman', Times, Georgia, serif;
+      font-size: 11pt;
+      color: #111;
+      line-height: 1.4;
+      background: #fff;
+    }
 
-    .sheet { max-width: 800px; margin: 0 auto; }
+    .sheet {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 10px;
+    }
 
-    .cabecalho { text-align: center; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 12px; }
-    .cabecalho .instituicao { font-size: 10.5pt; font-weight: bold; text-transform: uppercase; color: #333; line-height: 1.3; }
-    .cabecalho h1 { font-size: 16pt; margin: 6px 0 2px; font-variant: small-caps; }
+    /* ===== CABEÇALHO OFICIAL ===== */
+    .cabecalho {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .brasao-wrapper {
+      margin-bottom: 4px;
+    }
+    .instituicao {
+      font-size: 10.5pt;
+      line-height: 1.35;
+      font-weight: 500;
+      color: #111;
+      margin-bottom: 6px;
+    }
+    .titulo-prova {
+      font-size: 13pt;
+      font-weight: bold;
+      margin-top: 6px;
+      text-transform: none;
+    }
 
-    table.campos { width: 100%; margin-top: 8px; font-size: 10pt; border-collapse: collapse; }
-    table.campos td { padding: 3px 4px; }
+    /* ===== METADADOS EM 2 COLUNAS ===== */
+    .metadados-box {
+      width: 100%;
+      margin: 12px 0 14px;
+      font-size: 10.5pt;
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .meta-left {
+      text-align: left;
+    }
+    .meta-right {
+      text-align: right;
+    }
 
-    .grupo-secao { background: #f3f4f6; border-left: 4px solid #1f2937; padding: 6px 10px; margin: 16px 0 10px; }
-    .grupo-titulo { font-weight: bold; font-size: 11pt; color: #111827; }
-    .grupo-instrucoes { font-size: 9.5pt; font-style: italic; color: #4b5563; margin-top: 2px; }
+    /* ===== INSTRUÇÃO GERAL ===== */
+    .instrucao-geral {
+      font-size: 10.5pt;
+      margin: 10px 0 16px;
+      font-style: normal;
+    }
 
-    .instrucoes { font-size: 10pt; font-style: italic; color: #333; margin: 8px 0 12px; }
+    /* ===== GRUPOS (Iº, IIº, IIIº, IVº) ===== */
+    .grupo-secao {
+      text-align: center;
+      margin: 20px 0 8px;
+    }
+    .grupo-romano {
+      font-size: 13pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      display: inline-block;
+      border-bottom: 1px solid #111;
+      padding-bottom: 1px;
+    }
+    .grupo-intro {
+      text-align: justify;
+      font-size: 10.5pt;
+      margin: 8px 0 12px;
+      line-height: 1.4;
+      text-indent: 1.5em;
+    }
 
-    .questao { margin-bottom: 14px; }
-    .q-cabecalho { margin-bottom: 4px; }
-    .q-num { font-weight: bold; margin-right: 4px; }
-    .q-cota { font-weight: bold; color: #4b5563; font-size: 10pt; }
-    .q-info { font-size: 9pt; color: #666; margin-bottom: 4px; }
+    /* ===== QUESTÕES ===== */
+    .questao {
+      margin-bottom: 14px;
+      page-break-inside: avoid;
+    }
+    .q-enunciado {
+      font-weight: 500;
+      margin-bottom: 6px;
+      text-align: justify;
+    }
+    .q-enunciado .num {
+      font-weight: bold;
+      margin-right: 4px;
+    }
 
-    ul.alternativas { list-style: none; padding-left: 22px; }
-    ul.alternativas li { margin: 3px 0; }
-    ul.alternativas li.correta { color: #166534; font-weight: bold; }
-    ul.afirmacoes-vf { list-style: none; padding-left: 22px; }
-    ul.afirmacoes-vf li { margin: 4px 0; }
-    .vf-box { font-family: monospace, sans-serif; font-weight: bold; margin-right: 6px; }
-    .vf-box.vf-correta { color: #166534; font-weight: bold; }
-    .letra { font-weight: bold; margin-right: 6px; }
-    .check { color: #166534; font-weight: bold; margin-left: 8px; }
+    /* Múltipla Escolha com Círculos */
+    ul.alternativas-escolha {
+      list-style: none;
+      padding-left: 18px;
+    }
+    ul.alternativas-escolha li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+      font-size: 10.5pt;
+    }
+    .circulo-aluno {
+      font-size: 17pt;
+      line-height: 1;
+      margin-left: 14px;
+      flex-shrink: 0;
+    }
+    .circulo-gabarito {
+      font-size: 17pt;
+      line-height: 1;
+      margin-left: 14px;
+      flex-shrink: 0;
+      font-weight: bold;
+    }
+    .circulo-gabarito.correta {
+      color: #000;
+    }
 
-    .resposta-bloco { padding-left: 22px; margin: 4px 0; }
-    .resposta-label { font-style: italic; color: #333; font-size: 10pt; }
-    .linha { display: inline-block; width: 280px; border-bottom: 1px dotted #333; }
-    .espaco { height: 80px; border-bottom: 1px solid #ccc; margin: 4px 0 0 22px; }
-    .gabarito-resposta { padding-left: 22px; margin: 4px 0; color: #166534; font-weight: bold; }
+    /* Verdadeiro ou Falso */
+    ul.afirmacoes-vf {
+      list-style: none;
+      padding-left: 18px;
+    }
+    ul.afirmacoes-vf li {
+      margin-bottom: 5px;
+      font-size: 10.5pt;
+      display: flex;
+      align-items: baseline;
+    }
+    .vf-box {
+      font-family: monospace, Courier, sans-serif;
+      font-weight: bold;
+      margin-right: 8px;
+      white-space: nowrap;
+    }
 
-    .rodape { margin-top: 24px; border-top: 1px solid #999; padding-top: 6px; font-size: 9.5pt; text-align: center; color: #555; }
+    /* Completar Lacunas */
+    .resposta-bloco-completar {
+      padding-left: 18px;
+      margin: 6px 0;
+    }
+    .linha-lacuna {
+      display: inline-block;
+      width: 280px;
+      border-bottom: 1px solid #111;
+      margin-left: 6px;
+    }
+
+    /* Desenvolvimento */
+    .espaco-desenvolvimento {
+      height: 90px;
+      border-bottom: 1px solid #aaa;
+      margin: 8px 0 0 18px;
+    }
+
+    /* Respostas Gabarito */
+    .gabarito-texto {
+      padding-left: 18px;
+      margin: 5px 0;
+      font-weight: bold;
+      color: #15803d;
+    }
+
+    /* ===== TABELA DE COTAÇÃO OFICIAL ===== */
+    .cotacao-container {
+      margin-top: 28px;
+      page-break-inside: avoid;
+    }
+    .cotacao-titulo {
+      text-align: center;
+      font-weight: bold;
+      font-size: 11pt;
+      margin-bottom: 6px;
+    }
+    table.tabela-cotacao {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+      text-align: left;
+    }
+    table.tabela-cotacao th,
+    table.tabela-cotacao td {
+      border: 1px solid #222;
+      padding: 4px 8px;
+      vertical-align: middle;
+    }
+    table.tabela-cotacao th {
+      text-align: center;
+      font-weight: bold;
+      background: #fafafa;
+    }
+    table.tabela-cotacao td {
+      font-family: monospace, Courier, serif;
+      height: 22px;
+    }
+    table.tabela-cotacao tfoot td {
+      font-weight: bold;
+      text-align: center;
+      font-family: 'Times New Roman', serif;
+      background: #fafafa;
+    }
   </style>
 </head>
 <body>
 
-  <section class="sheet">
-    <div class="cabecalho">
-      <div style="text-align: center; margin-bottom: 4px;">
-        <img th:src="@{/img.png}" src="/img.png" width="50" style="display: inline;"/>
-      </div>
-      <p class="instituicao">
-        República de Angola<br/>
-        Governo da Província de Luanda<br/>
-        Direcção Municipal de Educação de Viana<br/>
-        Colégio Público nº 5108 Viana – Estalagem
-      </p>
-      <h1>Prova Trimestral de <span th:text="${disciplinaNome}"></span></h1>
-      <table class="campos">
-        <tr>
-          <td width="30%"><strong>Classe:</strong> <span th:text="${classeNome}"></span></td>
-          <td width="40%"><strong>Trimestre:</strong> <span th:text="${trimestreLabel}"></span></td>
-          <td width="30%"><strong>Cotação:</strong> 0 a 20 Valores</td>
-        </tr>
-        <tr>
-          <td colspan="2"><strong>Nome do Aluno:</strong> __________________________________________________</td>
-          <td><strong>Turma / Sala:</strong> _______ / _______</td>
-        </tr>
-        <tr>
-          <td><strong>Duração:</strong> 90 minutos</td>
-          <td><strong>Data:</strong> <span th:text="${dataLabel}"></span></td>
-          <td><strong>Classificação:</strong> _________ val.</td>
-        </tr>
-      </table>
+<section class="sheet">
+
+  <!-- CABEÇALHO OFICIAL -->
+  <div class="cabecalho">
+    <div class="brasao-wrapper">
+      <img th:src="@{/img.png}" src="/img.png" width="55" alt="Brasão de Angola" style="display:inline-block;"/>
     </div>
+    <div class="instituicao">
+      República de Angola<br/>
+      Governo da Província de Luanda<br/>
+      Direcção Municipal de Educação de Viana<br/>
+      Colégio Publico nº 5108 Viana – Estalagem
+    </div>
+    <div class="titulo-prova" th:if="${!mostrarGabarito}">
+      Prova Trimestral de <span th:text="${disciplinaNome}">Educação Moral e Cívica</span>
+    </div>
+    <div class="titulo-prova" th:if="${mostrarGabarito}">
+      Chave da Prova Trimestral de <span th:text="${disciplinaNome}">Educação Moral e Cívica</span>
+    </div>
+  </div>
 
-    <p class="instrucoes">
-      Lê atentamente as questões abaixo e responde com clareza. Justifique quando solicitado.
-    </p>
-
-    <div class="questoes">
-      <div class="questao" th:each="q, st : ${perguntas}">
-
-        <!-- Separador de Grupo/Seção -->
-        <div class="grupo-secao" th:if="${q.grupoTitulo != null and (st.first or !#strings.equals(perguntas[st.index - 1].grupoTitulo, q.grupoTitulo))}">
-          <div class="grupo-titulo" th:text="${q.grupoTitulo}"></div>
-          <div class="grupo-instrucoes" th:if="${q.grupoInstrucoes != null}" th:text="${q.grupoInstrucoes}"></div>
-        </div>
-
-        <div class="q-cabecalho">
-          <span class="q-num" th:text="${st.index + 1} + '.'"></span>
-          <span th:text="${q.enunciado}"></span>
-          <span class="q-cota" th:if="${q.pontuacao != null}" th:text="' (' + ${q.pontuacao} + ' val)'"></span>
-        </div>
-
-        <!-- Escolha Múltipla -->
-        <th:block th:if="${#strings.equals(q.tipoPergunta, 'ESCOLHA_MULTIPLA')}">
-          <ul class="alternativas">
-            <li th:each="r, rs : ${q.respostas}" th:classappend="${mostrarGabarito and r.correta} ? 'correta'">
-              <span class="letra" th:text="${r.letra} + ')'"></span>
-              <span th:text="${r.descricao}"></span>
-              <span class="check" th:if="${mostrarGabarito and r.correta}" th:text="'[CORRETA]'"></span>
-            </li>
-          </ul>
-        </th:block>
-
-        <!-- Verdadeiro ou Falso (Opção 2: Múltiplas Afirmações) -->
-        <th:block th:if="${#strings.equals(q.tipoPergunta, 'VERDADEIRO_FALSO')}">
-          <ul class="afirmacoes-vf">
-            <li th:each="r, rs : ${q.respostas}">
-              <span class="letra" th:text="${r.letra} + ')'"></span>
-              <span class="vf-box" th:if="${!mostrarGabarito}">( &nbsp;&nbsp;&nbsp; )</span>
-              <span class="vf-box vf-correta" th:if="${mostrarGabarito}" th:text="${r.correta} ? '( V )' : '( F )'"></span>
-              <span th:text="${r.descricao}"></span>
-            </li>
-          </ul>
-        </th:block>
-
-        <div th:if="${!mostrarGabarito and #strings.equals(q.tipoPergunta, 'COMPLETAR')}" class="resposta-bloco">
-          <span class="resposta-label">Resposta:</span> <span class="linha">&#160;</span>
-        </div>
-        <div th:if="${!mostrarGabarito and #strings.equals(q.tipoPergunta, 'DESENVOLVIMENTO')}" class="resposta-bloco">
-          <span class="resposta-label">Resposta / Desenvolvimento:</span>
-          <div class="espaco"></div>
-        </div>
-
-        <th:block th:if="${mostrarGabarito and #strings.equals(q.tipoPergunta, 'COMPLETAR')}">
-          <div class="gabarito-resposta">
-            Resposta oficial: <strong th:text="${#lists.isEmpty(q.respostas) ? '' : q.respostas[0].descricao}"></strong>
-          </div>
-        </th:block>
-        <th:block th:if="${mostrarGabarito and #strings.equals(q.tipoPergunta, 'DESENVOLVIMENTO')}">
-          <div class="gabarito-resposta">Resposta discursiva — Critério de correção por competências e síntese.</div>
-        </th:block>
+  <!-- METADADOS DA PROVA -->
+  <div class="metadados-box">
+    <div class="meta-row">
+      <div class="meta-left">
+        <strong th:text="${trimestreLabel}">IIº Trimestre</strong>: <span th:text="${anoLectivo}">2025/2026</span>
+      </div>
+      <div class="meta-right">
+        <strong th:text="${classeNome}">7ª Classe</strong>
       </div>
     </div>
-
-    <div class="rodape">
-      <span th:if="${mostrarGabarito}"><strong>[GABARITO OFICIAL DO PROFESSOR]</strong> · </span>
-      <span>Total da Avaliação: </span>
-      <strong th:text="${totalPontos} + ' Valores'"></strong>
+    <div class="meta-row">
+      <div class="meta-left">
+        <strong>Duração:</strong> <span th:text="${duracao}">90 Minutos</span>
+      </div>
+      <div class="meta-right">
+        <strong>Turno:</strong> <span th:text="${turno}">Manhã</span>
+      </div>
     </div>
-  </section>
+  </div>
+
+  <!-- INSTRUÇÃO GERAL -->
+  <div class="instrucao-geral">
+    Lê atentamente a prova e responda com clareza as questões:
+  </div>
+
+  <!-- QUESTÕES ORGANIZADAS POR GRUPO -->
+  <div class="questoes">
+    <div class="questao" th:each="q, st : ${perguntas}">
+
+      <!-- TÍTULO DO GRUPO (Iº, IIº, IIIº, IVº) -->
+      <div class="grupo-secao" th:if="${q.grupoTitulo != null and (st.first or !#strings.equals(perguntas[st.index - 1].grupoTitulo, q.grupoTitulo))}">
+        <div class="grupo-romano" th:text="${q.grupoTitulo}">Iº</div>
+      </div>
+
+      <!-- TEXTO DE INTRODUÇÃO DO GRUPO (SE HOUVER) -->
+      <div class="grupo-intro" th:if="${q.grupoInstrucoes != null and !#strings.isEmpty(q.grupoInstrucoes) and (st.first or !#strings.equals(perguntas[st.index - 1].grupoTitulo, q.grupoTitulo))}"
+           th:text="${q.grupoInstrucoes}">
+      </div>
+
+      <!-- ENUNCIADO DA QUESTÃO -->
+      <div class="q-enunciado">
+        <span class="num" th:text="${st.index + 1} + '.'">1.</span>
+        <span th:text="${q.enunciado}">Enunciado da pergunta</span>
+      </div>
+
+      <!-- 1. ESCOLHA MÚLTIPLA (COM CÍRCULOS DE MARCAÇÃO NO ESTILO DO PDF) -->
+      <th:block th:if="${#strings.equals(q.tipoPergunta, 'ESCOLHA_MULTIPLA')}">
+        <ul class="alternativas-escolha">
+          <li th:each="r, rs : ${q.respostas}">
+            <span>
+              <strong th:text="${#strings.toLowerCase(r.letra)} + '.'">a.</strong>
+              <span th:text="${r.descricao}">Texto da alternativa</span>
+            </span>
+            <span class="circulo-aluno" th:if="${!mostrarGabarito}">&#9675;</span>
+            <span class="circulo-gabarito correta" th:if="${mostrarGabarito and r.correta}">&#9679;</span>
+            <span class="circulo-gabarito" th:if="${mostrarGabarito and !r.correta}">&#9675;</span>
+          </li>
+        </ul>
+      </th:block>
+
+      <!-- 2. VERDADEIRO OU FALSO (MÚLTIPLAS AFIRMAÇÕES COM CAIXA DE V/F) -->
+      <th:block th:if="${#strings.equals(q.tipoPergunta, 'VERDADEIRO_FALSO')}">
+        <ul class="afirmacoes-vf">
+          <li th:each="r, rs : ${q.respostas}">
+            <strong style="margin-right: 6px;" th:text="${#strings.toLowerCase(r.letra)} + '.'">a.</strong>
+            <span class="vf-box" th:if="${!mostrarGabarito}">( &nbsp;&nbsp;&nbsp; )</span>
+            <span class="vf-box" th:if="${mostrarGabarito}" th:text="${r.correta} ? '( V )' : '( F )'" style="color:#000;">( V )</span>
+            <span th:text="${r.descricao}">Texto da afirmação</span>
+          </li>
+        </ul>
+      </th:block>
+
+      <!-- 3. COMPLETAR LACUNAS -->
+      <th:block th:if="${#strings.equals(q.tipoPergunta, 'COMPLETAR')}">
+        <div class="resposta-bloco-completar" th:if="${!mostrarGabarito}">
+          <span>Resposta:</span> <span class="linha-lacuna">&nbsp;</span>
+        </div>
+        <div class="gabarito-texto" th:if="${mostrarGabarito}">
+          Resposta: <strong th:text="${#lists.isEmpty(q.respostas) ? '' : q.respostas[0].descricao}"></strong>
+        </div>
+      </th:block>
+
+      <!-- 4. DESENVOLVIMENTO / REDAÇÃO -->
+      <th:block th:if="${#strings.equals(q.tipoPergunta, 'DESENVOLVIMENTO')}">
+        <div class="espaco-desenvolvimento" th:if="${!mostrarGabarito}"></div>
+        <div class="gabarito-texto" th:if="${mostrarGabarito}">
+          Resposta livre de desenvolvimento.
+        </div>
+      </th:block>
+
+    </div>
+  </div>
+
+  <!-- TABELA OFICIAL DE COTAÇÃO (PÁGINA 2 / 3 DO PDF) -->
+  <div class="cotacao-container" th:if="${cotacaoColunas != null and !cotacaoColunas.isEmpty()}">
+    <div class="cotacao-titulo" th:text="${mostrarGabarito} ? 'Cotação da Prova Trimestral' : 'Cotação'">
+      Cotação
+    </div>
+    <table class="tabela-cotacao">
+      <thead>
+        <tr>
+          <th th:each="col : ${cotacaoColunas}" th:text="${col.titulo}">Iº Grupo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="linhaIdx : ${#numbers.sequence(0, cotacaoLinhasCount - 1)}" th:if="${cotacaoLinhasCount > 0}">
+          <td th:each="col : ${cotacaoColunas}" th:text="${col.linhas[linhaIdx]}">1ª a) 1v</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td th:each="col : ${cotacaoColunas}" th:text="'Total: ' + ${col.total}">Total: 5v</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+</section>
 
 </body>
 </html>

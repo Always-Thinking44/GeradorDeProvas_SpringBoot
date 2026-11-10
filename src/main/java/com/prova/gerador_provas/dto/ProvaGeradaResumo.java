@@ -12,6 +12,7 @@ public class ProvaGeradaResumo {
     private LocalDateTime dataGeracao;
     private String classeNome;
     private String disciplinaNome;
+    private String anoLectivo;
     private Trimestre trimestre;
     private ModeloTemplate modelo;
     private int quantidadePerguntas;
@@ -31,6 +32,9 @@ public class ProvaGeradaResumo {
 
     public String getDisciplinaNome() { return disciplinaNome; }
     public void setDisciplinaNome(String disciplinaNome) { this.disciplinaNome = disciplinaNome; }
+
+    public String getAnoLectivo() { return anoLectivo; }
+    public void setAnoLectivo(String anoLectivo) { this.anoLectivo = anoLectivo; }
 
     public Trimestre getTrimestre() { return trimestre; }
     public void setTrimestre(Trimestre trimestre) { this.trimestre = trimestre; }

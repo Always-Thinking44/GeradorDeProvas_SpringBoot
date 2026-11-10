@@ -6,6 +6,7 @@ import com.prova.gerador_provas.dto.PerguntaSnapshot;
 import com.prova.gerador_provas.dto.ProvaGeradaResumo;
 import com.prova.gerador_provas.dto.RespostaSnapshot;
 import com.prova.gerador_provas.enums.ModeloTemplate;
+import com.prova.gerador_provas.enums.TipoPergunta;
 import com.prova.gerador_provas.enums.Trimestre;
 import com.prova.gerador_provas.model.*;
 import com.prova.gerador_provas.repository.ModeloProvaRepository;
@@ -39,6 +40,16 @@ public class ProvaGeradaService {
             Trimestre trimestre,
             ModeloTemplate template,
             Long modeloProvaId) {
+        return generateExam(classId, subjectId, trimestre, template, modeloProvaId, null);
+    }
+
+    public ProvaGerada generateExam(
+            Long classId,
+            Long subjectId,
+            Trimestre trimestre,
+            ModeloTemplate template,
+            Long modeloProvaId,
+            String anoLectivo) {
 
         // Validação de permissão do usuário atual
         Usuario usuario = usuarioService.getUsuarioAutenticado();
@@ -135,6 +146,7 @@ public class ProvaGeradaService {
         prova.setDisciplina(modelo.getDisciplina());
         prova.setTrimestre(modelo.getTrimestre());
         prova.setTemplate(templateUsado);
+        prova.setAnoLectivo(anoLectivo != null && !anoLectivo.isBlank() ? anoLectivo : "2025/2026");
         prova.setPerguntas(todasSelecionadas);
         prova.setDataGeracao(LocalDateTime.now());
         prova.setCodigo(gerarCodigo(prova));
@@ -173,6 +185,7 @@ public class ProvaGeradaService {
         resumo.setDataGeracao(prova.getDataGeracao());
         resumo.setClasseNome(prova.getClasse() != null ? prova.getClasse().getNome() : "—");
         resumo.setDisciplinaNome(prova.getDisciplina() != null ? prova.getDisciplina().getNome() : "—");
+        resumo.setAnoLectivo(prova.getAnoLectivo() != null && !prova.getAnoLectivo().isBlank() ? prova.getAnoLectivo() : "2025/2026");
         resumo.setTrimestre(prova.getTrimestre());
         resumo.setModelo(prova.getTemplate());
         resumo.setQuantidadePerguntas(perguntas.size());
@@ -215,6 +228,81 @@ public class ProvaGeradaService {
         ctx.put("dataLabel", formatarData(prova.getDataGeracao()));
         ctx.put("mostrarGabarito", mostrarGabarito);
         ctx.put("forPdf", forPdf);
+
+        String ano = prova.getAnoLectivo() != null && !prova.getAnoLectivo().isBlank() ? prova.getAnoLectivo() : "2025/2026";
+        ctx.put("anoLectivo", ano);
+        ctx.put("duracao", "90 Minutos");
+        ctx.put("turno", "Manhã");
+        ctx.put("instituicaoLinha1", "República de Angola");
+        ctx.put("instituicaoLinha2", "Governo da Província de Luanda");
+        ctx.put("instituicaoLinha3", "Direcção Municipal de Educação de Viana");
+        ctx.put("instituicaoLinha4", "Colégio Publico nº 5108 Viana – Estalagem");
+        ctx.put("instrucaoPadrao", "Lê atentamente a prova e responda com clareza as questões:");
+
+        // Agrupar perguntas por grupo e construir dados para a tabela de cotação oficial
+        Map<String, List<PerguntaSnapshot>> gruposMap = new LinkedHashMap<>();
+        int grupoIndex = 1;
+        for (PerguntaSnapshot q : perguntas) {
+            String grp = q.getGrupoTitulo();
+            if (grp == null || grp.isBlank()) {
+                grp = converterRomano(grupoIndex) + "º Grupo";
+            }
+            gruposMap.computeIfAbsent(grp, k -> new ArrayList<>()).add(q);
+        }
+
+        List<Map<String, Object>> cotacaoColunas = new ArrayList<>();
+        int totalMaxLinhas = 0;
+        int gCount = 1;
+        for (Map.Entry<String, List<PerguntaSnapshot>> entry : gruposMap.entrySet()) {
+            Map<String, Object> col = new LinkedHashMap<>();
+            String nomeGrupo = entry.getKey();
+            if (!nomeGrupo.toUpperCase().contains("GRUPO")) {
+                nomeGrupo = nomeGrupo + " Grupo";
+            }
+            col.put("titulo", nomeGrupo);
+
+            List<String> linhas = new ArrayList<>();
+            double totalGrupo = 0.0;
+            int qIdx = 1;
+            for (PerguntaSnapshot q : entry.getValue()) {
+                double pQuestao = q.getPontuacao() != null ? q.getPontuacao() : 0.0;
+                totalGrupo += pQuestao;
+                if (q.getRespostas() != null && q.getRespostas().size() > 1 && q.getTipoPergunta() != TipoPergunta.DESENVOLVIMENTO) {
+                    double porAlinea = pQuestao / q.getRespostas().size();
+                    String valStr = formatarValor(porAlinea);
+                    for (int rIdx = 0; rIdx < q.getRespostas().size(); rIdx++) {
+                        String letra = String.valueOf((char) ('a' + rIdx));
+                        if (rIdx == 0) {
+                            linhas.add(qIdx + "ª " + letra + ") " + valStr);
+                        } else {
+                            linhas.add(" " + letra + ") " + valStr);
+                        }
+                    }
+                } else {
+                    linhas.add(qIdx + "ª " + formatarValor(pQuestao));
+                }
+                qIdx++;
+            }
+            if (linhas.size() > totalMaxLinhas) {
+                totalMaxLinhas = linhas.size();
+            }
+            col.put("linhas", linhas);
+            col.put("total", formatarValor(totalGrupo));
+            cotacaoColunas.add(col);
+            gCount++;
+        }
+
+        // Equalizar linhas para tabela ficar simétrica
+        for (Map<String, Object> col : cotacaoColunas) {
+            @SuppressWarnings("unchecked")
+            List<String> linhas = (List<String>) col.get("linhas");
+            while (linhas.size() < totalMaxLinhas) {
+                linhas.add("");
+            }
+        }
+
+        ctx.put("cotacaoColunas", cotacaoColunas);
+        ctx.put("cotacaoLinhasCount", totalMaxLinhas);
         return ctx;
     }
 
@@ -297,6 +385,25 @@ public class ProvaGeradaService {
             case MODELO_1 -> "Modelo 1 — Clássico";
             case MODELO_2 -> "Modelo 2 — Moderno";
             case MODELO_3 -> "Modelo 3 — Compacto";
+        };
+    }
+
+    private String formatarValor(double val) {
+        if (Math.abs(val - Math.round(val)) < 0.01) {
+            return String.format("%dv", (long) val);
+        }
+        return String.format(java.util.Locale.US, "%.1fv", val).replace(".", ",");
+    }
+
+    private String converterRomano(int n) {
+        return switch (n) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            case 6 -> "VI";
+            default -> String.valueOf(n);
         };
     }
 }
