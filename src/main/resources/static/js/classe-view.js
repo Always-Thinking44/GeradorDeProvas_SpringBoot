@@ -400,7 +400,6 @@ function renderPerguntas(perguntas) {
       <td><span class="badge badge-gray">${labelDoEnum(ENUMS.trimestre, p.trimestre)}</span></td>
       <td><span class="badge ${badgeNivel(p.nivelDificuldade)}">${labelDoEnum(ENUMS.nivelDificuldade, p.nivelDificuldade)}</span></td>
       <td><span class="badge badge-purple">${labelDoEnum(ENUMS.tipoPergunta, p.tipoPergunta)}</span></td>
-      <td><span class="badge badge-gray">${p.pontuacao != null ? p.pontuacao + ' pts' : '—'}</span></td>
       <td>
         <button class="btn btn-outline btn-sm" onclick="editarPergunta(${p.id})">Editar</button>
         <button class="btn btn-danger-ghost btn-sm" onclick="removerPergunta(${p.id})">Excluir</button>
@@ -445,7 +444,6 @@ async function editarPergunta(id) {
         document.getElementById('perguntaNivel').value = p.nivelDificuldade || '';
         document.getElementById('perguntaTipo').value = p.tipoPergunta || '';
         document.getElementById('perguntaEnunciado').value = p.enunciado || '';
-        document.getElementById('perguntaPontuacao').value = p.pontuacao || '';
 
         onPerguntaDisciplinaChange();
         if (p.tema?.id) {
@@ -482,7 +480,6 @@ function resetFormNovaPergunta(ctx = {}) {
     document.getElementById('perguntaEditId').value = '';
     document.getElementById('novaPerguntaErro').style.display = 'none';
     document.getElementById('respostasList').innerHTML = '';
-    document.getElementById('perguntaPontuacao').value = '';
     respostaIdCounter = 0;
     addRespostaRow();
     addRespostaRow();
@@ -493,7 +490,6 @@ function resetFormNovaPergunta(ctx = {}) {
     if (ctx.trimestre) document.getElementById('perguntaTrimestre').value = ctx.trimestre;
     if (ctx.nivelDificuldade) document.getElementById('perguntaNivel').value = ctx.nivelDificuldade;
     if (ctx.tipoPergunta) document.getElementById('perguntaTipo').value = ctx.tipoPergunta;
-    if (ctx.pontuacao) document.getElementById('perguntaPontuacao').value = ctx.pontuacao;
 
     onPerguntaDisciplinaChange();
 
@@ -519,7 +515,6 @@ function montarContextoParaNovaPergunta() {
         nivelDificuldade: salvo.nivelDificuldade || '',
         tipoPergunta: salvo.tipoPergunta || '',
         temaId: (filtroDisciplina ? '' : salvo.temaId) || '',
-        pontuacao: salvo.pontuacao || '',
     };
 }
 
@@ -618,16 +613,10 @@ async function onSubmitNovaPergunta(e) {
     const nivelDificuldade = document.getElementById('perguntaNivel').value;
     const tipoPergunta = document.getElementById('perguntaTipo').value;
     const enunciado = document.getElementById('perguntaEnunciado').value.trim();
-    const pontuacao = document.getElementById('perguntaPontuacao').value;
     const respostas = coletarRespostas();
 
     if (!disciplinaId || !temaId || !trimestre || !nivelDificuldade || !tipoPergunta || !enunciado) {
         erro.textContent = 'Preencha todos os campos obrigatórios (inclusive o tema).';
-        erro.style.display = 'block';
-        return;
-    }
-    if (!pontuacao || Number(pontuacao) <= 0) {
-        erro.textContent = 'Informe a pontuação da pergunta.';
         erro.style.display = 'block';
         return;
     }
@@ -658,7 +647,6 @@ async function onSubmitNovaPergunta(e) {
 
     const payload = {
         enunciado,
-        pontuacao: Number(pontuacao),
         trimestre,
         nivelDificuldade,
         tipoPergunta,
@@ -683,7 +671,6 @@ async function onSubmitNovaPergunta(e) {
                 nivelDificuldade,
                 tipoPergunta,
                 temaId: Number(temaId),
-                pontuacao: Number(pontuacao),
             });
             toast('Pergunta cadastrada com sucesso!', 'success');
         }

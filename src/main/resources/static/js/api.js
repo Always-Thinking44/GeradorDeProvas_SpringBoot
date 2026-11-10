@@ -456,7 +456,7 @@ function aplicarPermissoesInterface() {
         `;
     }
 
-    // Se for Professor, esconde o botão de criar classe na sidebar
+    // Se for Professor, esconde ações exclusivas de Admin
     if (user.role === 'ROLE_PROFESSOR') {
         const btnNovaClasse = document.querySelector('.sidebar__new-class-btn');
         if (btnNovaClasse) btnNovaClasse.style.display = 'none';
@@ -464,6 +464,11 @@ function aplicarPermissoesInterface() {
         // Esconde menu exclusivo de Admin
         const linkProfessores = document.getElementById('navLinkProfessores');
         if (linkProfessores) linkProfessores.style.display = 'none';
+
+        // Esconde qualquer botão ou elemento reservado ao administrador
+        document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+            el.style.display = 'none';
+        });
     }
 }
 

@@ -65,7 +65,6 @@ function renderPerguntas(perguntas) {
       <td><span class="badge badge-gray">${labelDoEnum(ENUMS.trimestre, p.trimestre)}</span></td>
       <td><span class="badge ${badgeNivel(p.nivelDificuldade)}">${labelDoEnum(ENUMS.nivelDificuldade, p.nivelDificuldade)}</span></td>
       <td><span class="badge badge-purple">${labelDoEnum(ENUMS.tipoPergunta, p.tipoPergunta)}</span></td>
-      <td><span class="badge badge-gray">${p.pontuacao != null ? p.pontuacao + ' val' : '1.0 val'}</span></td>
       <td>
         <a class="btn btn-outline btn-sm" href="/classes/${p.classe?.id || ''}">Editar</a>
         <button class="btn btn-danger-ghost btn-sm" onclick="removerPergunta(${p.id})">Excluir</button>

@@ -5,6 +5,7 @@ import com.prova.gerador_provas.service.ClasseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -26,17 +27,20 @@ public class ClasseController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Classe> createClass(@RequestBody Classe classe) {
         Classe salva = classeService.save(classe);
         return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Classe updateClass(@PathVariable Long id, @RequestBody Classe classe) {
         return classeService.update(id, classe);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteClass(@PathVariable Long id) {
         classeService.delete(id);
     }

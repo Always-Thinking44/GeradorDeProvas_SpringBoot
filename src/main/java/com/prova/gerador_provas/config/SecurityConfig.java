@@ -57,6 +57,9 @@ public class SecurityConfig {
 
                 // Endpoints exclusivos de Administrador
                 .requestMatchers("/api/usuarios/**", "/api/atribuicoes/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/disciplinas/**", "/api/classes/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/disciplinas/**", "/api/classes/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/disciplinas/**", "/api/classes/**").hasAuthority("ROLE_ADMIN")
 
                 // Outras rotas REST protegidas
                 .requestMatchers("/api/**").authenticated()

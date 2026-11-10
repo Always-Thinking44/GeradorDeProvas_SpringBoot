@@ -5,6 +5,7 @@ import com.prova.gerador_provas.service.ClasseDisciplinaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class ClasseDisciplinaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Disciplina> cadastrar(@PathVariable Long classeId,
                                                 @RequestBody Map<String, String> body) {
         Disciplina disciplina = classeDisciplinaService.cadastrarDisciplinaNaClasse(classeId, body.get("nome"));
@@ -30,6 +32,7 @@ public class ClasseDisciplinaController {
     }
 
     @DeleteMapping("/{disciplinaId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void remover(@PathVariable Long classeId, @PathVariable Long disciplinaId) {
         classeDisciplinaService.removerDisciplinaDaClasse(classeId, disciplinaId);
     }

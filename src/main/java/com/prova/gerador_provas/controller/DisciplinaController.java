@@ -5,6 +5,7 @@ import com.prova.gerador_provas.service.DisciplinaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -26,12 +27,14 @@ public class DisciplinaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Disciplina> createSubject(@RequestBody Disciplina disciplina) {
         Disciplina salva = disciplinaService.save(disciplina);
         return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Disciplina updateSubject(
             @PathVariable Long id,
             @RequestBody Disciplina disciplina) {
@@ -39,6 +42,7 @@ public class DisciplinaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteSubject(@PathVariable Long id) {
         disciplinaService.delete(id);
     }
