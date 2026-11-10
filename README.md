@@ -1,110 +1,63 @@
-# Gerador de Provas
+# Gerador de Provas Automático (0 a 20 Valores)
 
-Sistema web para gestão de turmas, disciplinas, temas e banco de perguntas, com geração automática de provas. Backend em **Java + Spring Boot**, frontend em **Thymeleaf + JavaScript puro (vanilla)**.
+Sistema completo para gestão de banco de questões educacionais e geração inteligente e automática de exames e gabaritos em escala de **0 a 20 valores**.
 
-## Funcionalidades
+---
 
-- Cadastro de **classes** (turmas)
-- Cadastro de **disciplinas** (compartilhadas entre turmas) e vínculo de disciplinas a cada turma
-- Cadastro de **temas** por turma/disciplina/trimestre
-- Banco de **perguntas** com nível de dificuldade, tipo (escolha múltipla, verdadeiro/falso, desenvolvimento, completar) e respostas associadas
-- Filtro de perguntas por disciplina e trimestre
-- Geração de **provas** a partir dos filtros selecionados
-- Modelos de prova reutilizáveis
+## 🚀 Novidades e Recursos Implementados
 
-## Tecnologias
+1. **Autenticação Segura (JWT) & Controle de Acesso (RBAC):**
+   * Perfis: `ROLE_ADMIN` e `ROLE_PROFESSOR`.
+   * **Administrador:** Gerencia usuários, turmas e disciplinas, e define a **matriz de permissão** (quais turmas e disciplinas cada professor pode acessar).
+   * **Professor:** Acessa exclusivamente as classes e disciplinas atribuídas a ele para cadastrar perguntas por tema e gerar provas.
+   * Credenciais iniciais criadas automaticamente pelo `DataInitializer`:
+     * **Admin:** `admin@escola.com` / `admin123`
+     * **Professor:** `professor@escola.com` / `prof123`
 
-| Camada       | Tecnologia                          |
-|--------------|--------------------------------------|
-| Backend      | Java 21+, Spring Boot, Spring Data JPA (Hibernate) |
-| Banco de dados | MySQL (via XAMPP em desenvolvimento) |
-| Frontend     | Thymeleaf, HTML, CSS, JavaScript (vanilla, sem frameworks) |
-| Build        | Maven                                |
+2. **Geração Automática de Provas (0 a 20 Valores):**
+   * Estrutura de grupos por modelo (ex: Modelo Tradicional com 4 grupos: Escolha Múltipla, V/F, Completar, Desenvolvimento).
+   * **Validação Estrita de 20 Valores:** A prova e os grupos totalizam garantidamente 20.0 valores.
+   * **Diagnóstico de Déficit:** Se faltarem perguntas no banco para determinado grupo/trimestre, o gerador aponta exatamente qual seção precisa de mais cadastros.
+   * **Snapshot Imutável:** A prova gerada grava um snapshot JSON completo das perguntas e grupos na data da aplicação.
 
-## Estrutura do projeto
+3. **Soft Delete (Exclusão Segura):**
+   * As perguntas utilizam exclusão lógica (`ativo = false`), garantindo que o histórico de provas antigas nunca quebre por violação de integridade referencial.
 
+4. **Padronização RESTful:**
+   * Rotas padronizadas em plural e kebab-case (`/api/perguntas`, `/api/classes`, `/api/disciplinas`, `/api/modelos-prova`, `/api/provas-geradas`, `/api/usuarios`, `/api/atribuicoes`), mantendo retrocompatibilidade com o frontend.
+
+---
+
+## 📡 Principais Endpoints da API
+
+### Autenticação & Usuários
+* `POST /api/auth/login` — Autentica e retorna o token JWT e dados do usuário.
+* `GET  /api/auth/me` — Retorna dados do usuário autenticado no token.
+* `GET  /api/usuarios` — [Admin] Lista todos os usuários.
+* `POST /api/usuarios` — [Admin] Cria novo usuário (Professor/Admin).
+* `POST /api/atribuicoes` — [Admin] Vincula um Professor a uma Classe e Disciplina.
+* `DELETE /api/atribuicoes/{id}` — [Admin] Remove a atribuição.
+
+### Gestão Pedagógica
+* `GET  /api/classes` — Lista turmas cadastradas.
+* `GET  /api/disciplinas` — Lista disciplinas.
+* `GET  /api/temas` — Lista temas curriculares.
+* `GET  /api/perguntas` — Lista banco de perguntas ativas.
+* `POST /api/perguntas` — Cadastra pergunta com tipo, dificuldade, trimestre, cotação e alternativas.
+* `DELETE /api/perguntas/{id}` — Exclusão lógica (Soft delete).
+
+### Modelos e Geração de Exames
+* `GET  /api/modelos-prova` — Lista modelos de prova configurados com seus grupos e cotações.
+* `POST /api/provas-geradas/generate` — Gera automaticamente o exame sorteando perguntas conforme o modelo.
+* `GET  /api/provas-geradas/{id}/pdf` — Baixa o PDF oficial da prova para impressão.
+* `GET  /api/provas-geradas/{id}/gabarito/pdf` — Baixa o PDF oficial com o gabarito de correção para o professor.
+
+---
+
+## 🛠 Como Executar o Backend
+
+```bash
+cd gerador-provas
+./mvnw spring-boot:run
 ```
-src/main/java/com/prova/gerador_provas/
-├── controller/       # Controllers REST (@RestController) e de view (@Controller)
-├── service/          # Regras de negócio
-├── repository/       # Interfaces JpaRepository
-├── model/            # Entidades JPA
-└── enums/            # Enums de domínio (Trimestre, NivelDificuldade, TipoPergunta)
-
-src/main/resources/
-├── templates/         # Páginas Thymeleaf (index, classe-view, layout com fragments)
-├── static/css/        # style.css
-├── static/js/         # api.js (núcleo: modais, toasts, chamadas à API) e scripts por página
-└── application.properties
-```
-
-## Modelo de dados (resumo)
-
-- `Classe` — turma (ex: "10", "11")
-- `Disciplina` — disciplina global, reaproveitada entre turmas (ex: "Matemática")
-- `ClasseDisciplina` — tabela de junção que vincula uma `Disciplina` a uma `Classe`
-- `Tema` — tema de conteúdo, associado a `Classe` + `Disciplina` + `Trimestre`
-- `Pergunta` — pergunta associada a `Classe`, `Disciplina`, `Tema`, `NivelDificuldade`, `TipoPergunta` e `Trimestre`
-- `Resposta` — alternativas de uma `Pergunta` (para perguntas de escolha múltipla / verdadeiro-falso)
-- `ModeloProva` / `SecaoModelo` — modelos reutilizáveis de estrutura de prova
-- `ProvaGerada` — prova gerada a partir de um conjunto de perguntas filtradas
-
-## Como rodar localmente
-
-### Pré-requisitos
-
-- JDK 21+
-- Maven
-- MySQL (recomendado usar o XAMPP em desenvolvimento)
-
-### Passos
-
-1. Inicie o MySQL pelo painel do XAMPP.
-2. Crie o banco de dados:
-   ```sql
-   CREATE DATABASE gerador_provas;
-   ```
-3. Configure `src/main/resources/application.properties` com as credenciais do seu MySQL:
-   ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/gerador_provas
-   spring.datasource.username=root
-   spring.datasource.password=
-   spring.jpa.hibernate.ddl-auto=update
-   spring.jpa.show-sql=true
-   ```
-4. Rode a aplicação:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-5. Acesse [http://localhost:8080](http://localhost:8080)
-
-## Principais endpoints da API
-
-| Método | Endpoint                                   | Descrição                              |
-|--------|---------------------------------------------|-----------------------------------------|
-| GET    | `/api/classe`                                | Lista todas as classes                  |
-| POST   | `/api/classe`                                | Cria uma classe                         |
-| GET    | `/api/classes/{classeId}/disciplinas`        | Lista disciplinas vinculadas à classe   |
-| POST   | `/api/classes/{classeId}/disciplinas`        | Vincula (ou cria e vincula) uma disciplina à classe |
-| GET    | `/api/disciplinas`                           | Lista todas as disciplinas (global)     |
-| GET    | `/api/temas`                                 | Lista todos os temas                    |
-| POST   | `/api/temas`                                 | Cria um tema                            |
-| GET    | `/api/pergunta`                              | Lista todas as perguntas                |
-| POST   | `/api/pergunta`                              | Cria uma pergunta                       |
-| DELETE | `/api/pergunta/{id}`                         | Remove uma pergunta                     |
-| POST   | `/api/prova_gerada/generate?classId=&subjectId=&termId=` | Gera uma prova a partir dos filtros |
-| GET    | `/api/modelo_prova`                          | Lista modelos de prova                  |
-
-> Observação: os nomes dos endpoints ainda estão inconsistentes entre singular/plural/snake_case (ex: `/api/classe` vs `/api/disciplinas` vs `/api/prova_gerada`). Padronizar isso é um item pendente de melhoria.
-
-## Notas de desenvolvimento
-
-- As entidades com relações `@OneToMany` usam `@JsonIgnore` no lado inverso para evitar referência circular na serialização JSON (Jackson).
-- `api.js` centraliza toda a lógica compartilhada do frontend: controle de modais (`openModal`/`closeModal`), notificações (`toast`), sanitização (`escapeHtml`), enums espelhados do backend (`ENUMS`) e o wrapper de chamadas HTTP (`Api.*`).
-
-## Roadmap / melhorias pendentes
-
-- [ ] Padronizar nomenclatura dos endpoints REST
-- [ ] Adicionar autenticação/autorização
-- [ ] Testes automatizados (unitários e de integração)
-- [ ] Paginação nas listagens (perguntas, disciplinas)
+Acesse `http://localhost:8080`.

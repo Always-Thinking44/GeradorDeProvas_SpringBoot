@@ -8,96 +8,79 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 11pt; color: #1f2937; line-height: 1.5; }
 
-    .toolbar { position: fixed; top: 0; left: 0; right: 0; background: #1e1b4b; padding: 10px 18px; z-index: 50; }
-    .toolbar a, .toolbar button { display: inline-block; margin-right: 8px; padding: 8px 14px; background: #312e81; color: #e0e7ff; text-decoration: none; border: 1px solid #4338ca; font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; cursor: pointer; }
-    .toolbar a:hover, .toolbar button:hover { background: #4f46e5; color: #fff; }
-    @media print { .toolbar { display: none; } }
-
-    body.sheet-body { padding-top: 58px; }
-    @media print { body.sheet-body { padding-top: 0; } }
-
     .sheet { max-width: 820px; margin: 0 auto; }
 
-    .cabecalho { background-color: #eef2ff; border: 1px solid #c7d2fe; border-left: 6px solid #4f46e5; padding: 14px 18px; margin-bottom: 14px; }
-    .cabecalho .rotulo { font-size: 10pt; font-weight: bold; color: #4f46e5; text-transform: uppercase; letter-spacing: .1em; }
-    .cabecalho h1 { font-size: 18pt; margin: 4px 0; color: #312e81; }
-    .cabecalho .linha-meta { margin-top: 6px; font-size: 10.5pt; color: #4338ca; }
-    .cabecalho .linha-meta strong { color: #1e1b4b; }
+    .cabecalho { background-color: #f8fafc; border: 1px solid #cbd5e1; border-left: 6px solid #2563eb; padding: 12px 16px; margin-bottom: 12px; }
+    .cabecalho .rotulo { font-size: 9pt; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: .08em; }
+    .cabecalho h1 { font-size: 16pt; margin: 4px 0; color: #1e293b; }
+    .cabecalho .linha-meta { margin-top: 6px; font-size: 10pt; color: #475569; }
 
-    table.campos { width: 100%; margin-top: 10px; font-size: 10pt; border-collapse: collapse; }
-    table.campos td { padding: 3px 6px; }
+    table.campos { width: 100%; margin-top: 8px; font-size: 9.5pt; border-collapse: collapse; }
+    table.campos td { padding: 3px 4px; }
 
-    .instrucoes { background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 8px 12px; font-size: 9.5pt; color: #374151; margin-bottom: 16px; }
+    .grupo-secao { background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 6px 12px; margin: 16px 0 10px; }
+    .grupo-titulo { font-weight: bold; font-size: 10.5pt; color: #1e40af; }
+    .grupo-instrucoes { font-size: 9pt; font-style: italic; color: #3b82f6; margin-top: 2px; }
 
-    .questao { margin-bottom: 20px; }
+    .instrucoes { background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 6px 10px; font-size: 9pt; color: #374151; margin-bottom: 14px; }
+
+    .questao { margin-bottom: 16px; }
     .q-cabecalho { margin-bottom: 4px; }
-    .q-num { display: inline-block; background-color: #4f46e5; color: #fff; font-weight: bold; padding: 1px 8px; margin-right: 8px; }
+    .q-num { display: inline-block; background-color: #2563eb; color: #fff; font-weight: bold; padding: 1px 7px; margin-right: 6px; font-size: 9.5pt; border-radius: 3px; }
     .q-texto { font-weight: 600; }
-    .q-info { font-size: 9pt; color: #6b7280; margin-bottom: 6px; }
-    .q-info .badge { display: inline-block; background-color: #eef2ff; color: #4338ca; padding: 0 8px; margin-right: 6px; }
+    .q-cota { font-weight: bold; color: #2563eb; font-size: 9.5pt; }
 
-    ul.alternativas { list-style: none; padding-left: 30px; }
-    ul.alternativas li { margin: 4px 0; }
-    ul.alternativas li.correta { background-color: #f0fdf4; color: #166534; font-weight: bold; padding: 2px 6px; }
-    .letra { font-weight: bold; color: #4338ca; margin-right: 6px; }
+    ul.alternativas { list-style: none; padding-left: 28px; }
+    ul.alternativas li { margin: 3px 0; }
+    ul.alternativas li.correta { background-color: #f0fdf4; color: #166534; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+    .letra { font-weight: bold; color: #2563eb; margin-right: 6px; }
     .check { color: #166534; font-weight: bold; margin-left: 8px; }
 
-    .resposta-bloco { padding-left: 30px; margin: 6px 0; }
-    .resposta-label { font-weight: 600; color: #374151; }
-    .linha { display: inline-block; width: 240px; border-bottom: 1px dotted #6b7280; }
-    .espaco { height: 80px; border: 1px dashed #cbd5e1; margin: 8px 0 0 30px; }
-    .gabarito-resposta { padding-left: 30px; margin: 6px 0; color: #166534; font-weight: bold; }
+    .resposta-bloco { padding-left: 28px; margin: 6px 0; }
+    .resposta-label { font-weight: 600; color: #374151; font-size: 9.5pt; }
+    .linha { display: inline-block; width: 260px; border-bottom: 1px dotted #6b7280; }
+    .espaco { height: 75px; border: 1px dashed #94a3b8; margin: 6px 0 0 28px; border-radius: 4px; }
+    .gabarito-resposta { padding-left: 28px; margin: 6px 0; color: #166534; font-weight: bold; }
 
-    .rodape { margin-top: 26px; border-top: 2px solid #4f46e5; padding-top: 8px; font-size: 9.5pt; color: #6b7280; text-align: center; }
+    .rodape { margin-top: 22px; border-top: 2px solid #2563eb; padding-top: 6px; font-size: 9.5pt; color: #64748b; text-align: center; }
   </style>
 </head>
-<body class="sheet-body">
+<body>
 
-  <div class="toolbar" th:if="${!forPdf}">
-    <a href="/provas">← Voltar</a>
-    <a th:href="${mostrarGabarito ? ('/provas/' + prova.id) : ('/provas/' + prova.id + '/gabarito')}"
-       th:text="${mostrarGabarito ? 'Ver prova' : 'Ver gabarito'}">Ver gabarito</a>
-    <a th:href="'/api/prova_gerada/' + ${prova.id} + '/pdf'">PDF da prova</a>
-    <a th:href="'/api/prova_gerada/' + ${prova.id} + '/gabarito/pdf'">PDF do gabarito</a>
-    <button type="button" onclick="window.print()">Imprimir</button>
-  </div>
-
-  <div class="sheet">
+  <section class="sheet">
     <div class="cabecalho">
-      <div class="rotulo">Avaliação · <span th:text="${trimestreLabel}"></span></div>
-      <h1>Prova de <span th:text="${disciplinaNome}"></span></h1>
-      <div class="linha-meta">
-        Classe: <strong th:text="${classeNome}"></strong>
-        <span> · </span>
-        Modelo: <strong th:text="${templateLabel}"></strong>
-        <span> · </span>
-        Total: <strong th:text="${totalPontos} + ' pontos'"></strong>
-      </div>
+      <div class="rotulo">República de Angola · Ministério da Educação</div>
+      <h1>Avaliação de <span th:text="${disciplinaNome}"></span></h1>
       <table class="campos">
         <tr>
-          <td>Nome: <span style="border-bottom:1px solid #4338ca;display:inline-block;width:300px">&#160;</span></td>
-          <td>Nº: <span style="border-bottom:1px solid #4338ca;display:inline-block;width:90px">&#160;</span></td>
-          <td>Data: <span style="border-bottom:1px solid #4338ca;display:inline-block;width:120px">&#160;</span></td>
+          <td><strong>Classe:</strong> <span th:text="${classeNome}"></span></td>
+          <td><strong>Trimestre:</strong> <span th:text="${trimestreLabel}"></span></td>
+          <td><strong>Escala:</strong> 0 a 20 Valores</td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>Aluno(a):</strong> __________________________________________________</td>
+          <td><strong>Turma:</strong> _______</td>
         </tr>
       </table>
     </div>
 
-    <p class="instrucoes">
-      Responda às questões abaixo. Nas questões de escolha múltipla, assinale apenas uma alternativa.
-      Nas questões de desenvolvimento, escreva a resposta nos espaços indicados.
-    </p>
+    <div class="instrucoes">
+      <strong>Orientações:</strong> Lê atentamente cada questão. Escreve com letra legível e evita rasuras.
+    </div>
 
     <div class="questoes">
       <div class="questao" th:each="q, st : ${perguntas}">
+
+        <!-- Separador de Grupo/Seção -->
+        <div class="grupo-secao" th:if="${q.grupoTitulo != null and (st.first or !#strings.equals(perguntas[st.index - 1].grupoTitulo, q.grupoTitulo))}">
+          <div class="grupo-titulo" th:text="${q.grupoTitulo}"></div>
+          <div class="grupo-instrucoes" th:if="${q.grupoInstrucoes != null}" th:text="${q.grupoInstrucoes}"></div>
+        </div>
+
         <div class="q-cabecalho">
           <span class="q-num" th:text="${st.index + 1}"></span>
           <span class="q-texto" th:text="${q.enunciado}"></span>
-        </div>
-        <div class="q-info">
-          <span class="badge" th:text="${q.tipoLabel}"></span>
-          <span class="badge" th:text="${q.nivelLabel}"></span>
-          <span th:if="${q.tema != null}" th:text="'Tema: ' + ${q.tema}"></span>
-          <span th:if="${q.pontuacao != null}" th:text="' · ' + ${q.pontuacao} + ' pts'"></span>
+          <span class="q-cota" th:if="${q.pontuacao != null}" th:text="' [' + ${q.pontuacao} + ' val]'"></span>
         </div>
 
         <th:block th:if="${#strings.equals(q.tipoPergunta, 'ESCOLHA_MULTIPLA') or #strings.equals(q.tipoPergunta, 'VERDADEIRO_FALSO')}">
@@ -114,26 +97,27 @@
           <span class="resposta-label">Resposta:</span> <span class="linha">&#160;</span>
         </div>
         <div th:if="${!mostrarGabarito and #strings.equals(q.tipoPergunta, 'DESENVOLVIMENTO')}" class="resposta-bloco">
-          <span class="resposta-label">Resposta:</span>
+          <span class="resposta-label">Resolução / Justificação:</span>
           <div class="espaco"></div>
         </div>
+
         <th:block th:if="${mostrarGabarito and #strings.equals(q.tipoPergunta, 'COMPLETAR')}">
           <div class="gabarito-resposta">
-            Resposta correta: <strong th:text="${#lists.isEmpty(q.respostas) ? '' : q.respostas[0].descricao}"></strong>
+            Resposta: <strong th:text="${#lists.isEmpty(q.respostas) ? '' : q.respostas[0].descricao}"></strong>
           </div>
         </th:block>
         <th:block th:if="${mostrarGabarito and #strings.equals(q.tipoPergunta, 'DESENVOLVIMENTO')}">
-          <div class="gabarito-resposta">Resposta discursiva — correção manual.</div>
+          <div class="gabarito-resposta">Critério de Avaliação: Resposta discursiva com pontuação máxima de acordo com a precisão dos argumentos.</div>
         </th:block>
       </div>
     </div>
 
     <div class="rodape">
-      <span th:if="${mostrarGabarito}">GABARITO · </span>
-      <span>Total: </span>
-      <span th:text="${totalPontos} + ' pontos'"></span>
+      <span th:if="${mostrarGabarito}"><strong>[GABARITO DE CORREÇÃO]</strong> · </span>
+      <span>Cotação Máxima da Prova: </span>
+      <strong th:text="${totalPontos} + ' Valores'"></strong>
     </div>
-  </div>
+  </section>
 
 </body>
 </html>

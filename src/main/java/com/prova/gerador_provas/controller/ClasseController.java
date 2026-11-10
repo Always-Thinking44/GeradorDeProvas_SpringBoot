@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/classe")
+@RequestMapping({"/api/classes", "/api/classe"})
 @RequiredArgsConstructor
 public class ClasseController {
 
@@ -32,8 +32,7 @@ public class ClasseController {
     }
 
     @PutMapping("/{id}")
-    public Classe updateClass(@PathVariable Long id,
-                              @RequestBody Classe classe) {
+    public Classe updateClass(@PathVariable Long id, @RequestBody Classe classe) {
         return classeService.update(id, classe);
     }
 

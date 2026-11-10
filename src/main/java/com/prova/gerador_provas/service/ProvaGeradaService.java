@@ -12,19 +12,13 @@ import com.prova.gerador_provas.repository.ModeloProvaRepository;
 import com.prova.gerador_provas.repository.PerguntaRepository;
 import com.prova.gerador_provas.repository.ProvaGeradaRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +30,7 @@ public class ProvaGeradaService {
     private final ModeloProvaRepository modeloRepository;
     private final PerguntaRepository perguntaRepository;
     private final ProvaGeradaRepository provaRepository;
+    private final UsuarioService usuarioService;
     private final ObjectMapper objectMapper;
 
     public ProvaGerada generateExam(
@@ -45,15 +40,19 @@ public class ProvaGeradaService {
             ModeloTemplate template,
             Long modeloProvaId) {
 
+        // Validação de permissão do usuário atual
+        Usuario usuario = usuarioService.getUsuarioAutenticado();
+        if (usuario != null && !usuarioService.professorTemAcesso(usuario, classId, subjectId)) {
+            throw new IllegalArgumentException("Você não tem permissão para gerar provas desta Classe e Disciplina.");
+        }
+
         ModeloProva modelo;
 
         if (modeloProvaId != null) {
             modelo = modeloRepository.findById(modeloProvaId)
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "Modelo de prova não encontrado."));
+                    .orElseThrow(() -> new EntityNotFoundException("Modelo de prova não encontrado."));
             if (!Boolean.TRUE.equals(modelo.getAtivo())) {
-                throw new IllegalArgumentException(
-                        "O modelo de prova selecionado não está ativo.");
+                throw new IllegalArgumentException("O modelo de prova selecionado não está ativo.");
             }
         } else {
             modelo = modeloRepository
@@ -71,8 +70,11 @@ public class ProvaGeradaService {
                 ? template
                 : (modelo.getTemplate() != null ? modelo.getTemplate() : ModeloTemplate.MODELO_1);
 
-        List<Pergunta> selecionadas = new ArrayList<>();
+        List<Pergunta> todasSelecionadas = new ArrayList<>();
+        List<PerguntaSnapshot> snapshots = new ArrayList<>();
         Set<Long> usadas = new HashSet<>();
+
+        double somaTotalCalculada = 0.0;
 
         for (SecaoModelo secao : modelo.getSecoes()) {
             int solicitadas = secao.getQuantidade() == null ? 0 : secao.getQuantidade();
@@ -92,8 +94,8 @@ public class ProvaGeradaService {
 
             if (disponiveis.size() < solicitadas) {
                 throw new IllegalArgumentException(String.format(
-                        "Banco de perguntas insuficiente para a seção %s (%s): solicitadas %d, disponíveis %d. Cadastre mais perguntas desse tipo ou ajuste o modelo.",
-                        labelTipo(secao.getTipoPergunta()),
+                        "Banco de perguntas insuficiente para a seção %s (%s): solicitadas %d, disponíveis %d. Cadastre mais perguntas desse tipo no trimestre indicado.",
+                        secao.getTitulo() != null ? secao.getTitulo() : labelTipo(secao.getTipoPergunta()),
                         labelNivel(secao.getNivelDificuldade()),
                         solicitadas,
                         disponiveis.size()));
@@ -101,15 +103,31 @@ public class ProvaGeradaService {
 
             Collections.shuffle(disponiveis);
 
+            double cotacaoSecao = secao.getPontuacaoTotalCalculada() > 0
+                    ? secao.getPontuacaoTotalCalculada()
+                    : (20.0 / modelo.getSecoes().size());
+
+            double cotacaoPorItem = cotacaoSecao / solicitadas;
+
             for (Pergunta p : disponiveis.subList(0, solicitadas)) {
                 usadas.add(p.getId());
-                selecionadas.add(p);
+                todasSelecionadas.add(p);
+
+                PerguntaSnapshot snap = converterParaSnapshot(p, secao.getTitulo(), secao.getInstrucoes(), cotacaoPorItem);
+                snapshots.add(snap);
+                somaTotalCalculada += cotacaoPorItem;
             }
         }
 
-        if (selecionadas.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "O modelo não possui seções com quantidade definida. Ajuste o modelo de prova.");
+        if (snapshots.isEmpty()) {
+            throw new IllegalArgumentException("O modelo não possui grupos/seções válidos. Ajuste o modelo de prova.");
+        }
+
+        // Ajuste fino para cravar exatamente 20.0 valores caso haja dízimas/arredondamento
+        double diferenca = 20.0 - somaTotalCalculada;
+        if (Math.abs(diferenca) > 0.001 && !snapshots.isEmpty()) {
+            PerguntaSnapshot ultimo = snapshots.get(snapshots.size() - 1);
+            ultimo.setPontuacao(Math.round((ultimo.getPontuacao() + diferenca) * 100.0) / 100.0);
         }
 
         ProvaGerada prova = new ProvaGerada();
@@ -117,10 +135,10 @@ public class ProvaGeradaService {
         prova.setDisciplina(modelo.getDisciplina());
         prova.setTrimestre(modelo.getTrimestre());
         prova.setTemplate(templateUsado);
-        prova.setPerguntas(selecionadas);
+        prova.setPerguntas(todasSelecionadas);
         prova.setDataGeracao(LocalDateTime.now());
         prova.setCodigo(gerarCodigo(prova));
-        prova.setPerguntasSnapshot(serializarSnapshot(selecionadas));
+        prova.setPerguntasSnapshot(serializarSnapshots(snapshots));
 
         return provaRepository.save(prova);
     }
@@ -140,8 +158,7 @@ public class ProvaGeradaService {
 
     public ProvaGerada findById(Long id) {
         return provaRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Prova não encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Prova não encontrada."));
     }
 
     public void delete(Long id) {
@@ -203,37 +220,44 @@ public class ProvaGeradaService {
 
     /* ---------- helpers ---------- */
 
-    private String gerarCodigo(ProvaGerada prova) {
-        return "PROVA-" + System.currentTimeMillis();
+    private PerguntaSnapshot converterParaSnapshot(
+            Pergunta p,
+            String grupoTitulo,
+            String grupoInstrucoes,
+            double cotacao) {
+
+        PerguntaSnapshot s = new PerguntaSnapshot();
+        s.setId(p.getId());
+        s.setEnunciado(p.getEnunciado());
+        s.setTema(p.getTema() != null ? p.getTema().getNome() : null);
+        s.setNivelDificuldade(p.getNivelDificuldade());
+        s.setTipoPergunta(p.getTipoPergunta());
+        s.setPontuacao(Math.round(cotacao * 100.0) / 100.0);
+        s.setGrupoTitulo(grupoTitulo != null ? grupoTitulo : "Grupo de Perguntas");
+        s.setGrupoInstrucoes(grupoInstrucoes);
+
+        List<RespostaSnapshot> respostas = new ArrayList<>();
+        if (p.getRespostas() != null) {
+            for (int i = 0; i < p.getRespostas().size(); i++) {
+                Resposta r = p.getRespostas().get(i);
+                RespostaSnapshot rs = new RespostaSnapshot();
+                rs.setDescricao(r.getDescricao());
+                rs.setCorreta(Boolean.TRUE.equals(r.getCorreta()));
+                rs.setLetra(letra(i));
+                respostas.add(rs);
+            }
+        }
+        s.setRespostas(respostas);
+        return s;
     }
 
-    private String serializarSnapshot(List<Pergunta> perguntas) {
-        List<PerguntaSnapshot> snapshot = perguntas.stream().map(p -> {
-            PerguntaSnapshot s = new PerguntaSnapshot();
-            s.setId(p.getId());
-            s.setEnunciado(p.getEnunciado());
-            s.setTema(p.getTema() != null ? p.getTema().getNome() : null);
-            s.setNivelDificuldade(p.getNivelDificuldade());
-            s.setTipoPergunta(p.getTipoPergunta());
-            s.setPontuacao(p.getPontuacao());
+    private String gerarCodigo(ProvaGerada prova) {
+        return "EXAM-" + System.currentTimeMillis();
+    }
 
-            List<RespostaSnapshot> respostas = new ArrayList<>();
-            if (p.getRespostas() != null) {
-                for (int i = 0; i < p.getRespostas().size(); i++) {
-                    Resposta r = p.getRespostas().get(i);
-                    RespostaSnapshot rs = new RespostaSnapshot();
-                    rs.setDescricao(r.getDescricao());
-                    rs.setCorreta(Boolean.TRUE.equals(r.getCorreta()));
-                    rs.setLetra(letra(i));
-                    respostas.add(rs);
-                }
-            }
-            s.setRespostas(respostas);
-            return s;
-        }).toList();
-
+    private String serializarSnapshots(List<PerguntaSnapshot> snapshots) {
         try {
-            return objectMapper.writeValueAsString(snapshot);
+            return objectMapper.writeValueAsString(snapshots);
         } catch (Exception e) {
             throw new IllegalStateException("Erro ao gerar snapshot da prova.", e);
         }
@@ -270,9 +294,9 @@ public class ProvaGeradaService {
 
     private String labelTemplate(ModeloTemplate template) {
         return switch (template) {
-            case MODELO_1 -> "Modelo 1";
-            case MODELO_2 -> "Modelo 2";
-            case MODELO_3 -> "Modelo 3";
+            case MODELO_1 -> "Modelo 1 — Clássico";
+            case MODELO_2 -> "Modelo 2 — Moderno";
+            case MODELO_3 -> "Modelo 3 — Compacto";
         };
     }
 }
