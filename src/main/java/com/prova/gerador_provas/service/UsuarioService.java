@@ -35,27 +35,32 @@ public class UsuarioService {
     private final DisciplinaRepository disciplinaRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     public List<UsuarioResponse> findAll() {
         return usuarioRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UsuarioResponse> findAllProfessores() {
         return usuarioRepository.findByRole(Role.ROLE_PROFESSOR).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Usuario findById(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
     }
 
+    @Transactional(readOnly = true)
     public UsuarioResponse findResponseById(Long id) {
         return toResponse(findById(id));
     }
 
+    @Transactional(readOnly = true)
     public Optional<Usuario> findByEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
@@ -142,12 +147,14 @@ public class UsuarioService {
         atribuicaoRepository.deleteById(atribuicaoId);
     }
 
+    @Transactional(readOnly = true)
     public List<AtribuicaoResponse> findAtribuicoesByProfessor(Long professorId) {
         return atribuicaoRepository.findByProfessorId(professorId).stream()
                 .map(this::toAtribuicaoResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public boolean professorTemAcesso(Usuario usuario, Long classeId, Long disciplinaId) {
         if (usuario.getRole() == Role.ROLE_ADMIN) {
             return true; // Admin tem acesso a tudo
@@ -156,6 +163,7 @@ public class UsuarioService {
                 usuario.getId(), classeId, disciplinaId);
     }
 
+    @Transactional(readOnly = true)
     public Usuario getUsuarioAutenticado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
@@ -167,9 +175,15 @@ public class UsuarioService {
     /* ── Mappers ── */
 
     public UsuarioResponse toResponse(Usuario u) {
-        List<AtribuicaoResponse> atribuicoes = u.getAtribuicoes() != null
-                ? u.getAtribuicoes().stream().map(this::toAtribuicaoResponse).toList()
-                : List.of();
+        List<AtribuicaoResponse> atribuicoes;
+        if (u.getId() != null) {
+            // Busca segura via repository que não dispara LazyInitializationException
+            atribuicoes = atribuicaoRepository.findByProfessorId(u.getId()).stream()
+                    .map(this::toAtribuicaoResponse)
+                    .toList();
+        } else {
+            atribuicoes = List.of();
+        }
 
         return new UsuarioResponse(
                 u.getId(),

@@ -2,7 +2,6 @@ package com.prova.gerador_provas.controller;
 
 import com.prova.gerador_provas.dto.LoginRequest;
 import com.prova.gerador_provas.dto.LoginResponse;
-import com.prova.gerador_provas.dto.RegisterUsuarioRequest;
 import com.prova.gerador_provas.dto.UsuarioResponse;
 import com.prova.gerador_provas.model.Usuario;
 import com.prova.gerador_provas.service.JwtService;
@@ -13,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +25,7 @@ public class AuthController {
     private final UsuarioService usuarioService;
 
     @PostMapping("/login")
+    @Transactional(readOnly = true)
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.senha())
@@ -53,6 +54,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @Transactional(readOnly = true)
     public ResponseEntity<UsuarioResponse> getMe() {
         Usuario usuario = usuarioService.getUsuarioAutenticado();
         if (usuario == null) {
