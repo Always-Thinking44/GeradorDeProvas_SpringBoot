@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Modelos de prova · Gerador de Provas</title>
+    <title>Modelos de prova (0 a 20 Valores) · Gerador de Provas</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,22 +12,20 @@
 <div th:replace="~{fragments/layout :: sidebar}"></div>
 
 <div class="main">
-    <div th:replace="~{fragments/layout :: topbar('Modelos de prova', 'Defina a estrutura (seções) e o layout de cada prova')}"></div>
+    <div th:replace="~{fragments/layout :: topbar('Modelos de Prova', 'Estrutura de grupos de questões com validação de 0 a 20 Valores')}"></div>
 
     <div class="content">
         <div class="card">
             <div class="card__header">
-                <h2>Modelos cadastrados</h2>
+                <h2>Modelos Cadastrados (Escala de 0 a 20 Valores)</h2>
                 <button class="btn btn-primary btn-sm" onclick="abrirModalModelo()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Novo modelo
+                    Novo Modelo de Prova
                 </button>
             </div>
 
             <p style="color:var(--text-muted);margin-top:0;font-size:.85rem;line-height:1.5">
-                Cada modelo combina turma + disciplina + trimestre e define quantas perguntas
-                de cada tipo/nível sortear. O layout (Clássico, Moderno ou Compacto) é escolhido
-                na hora de gerar a prova.
+                Cada modelo define os <strong>grupos da prova</strong> (ex: Grupo I - Múltipla Escolha, Grupo II - V/F, Grupo III - Completar, Grupo IV - Redação). A soma das cotações de todos os grupos deve totalizar <strong>exatamente 20 valores</strong>.
             </p>
 
             <div class="modelos-grid" id="modelosGrid"></div>
@@ -43,7 +41,7 @@
 
 <!-- Modal: Modelo (novo/edição) -->
 <div class="modal-overlay" id="modalModelo">
-    <div class="modal modal-lg">
+    <div class="modal modal-lg" style="max-width: 820px;">
         <div class="modal__header">
             <h3 id="modeloModalTitulo">Novo modelo de prova</h3>
             <button class="modal__close" onclick="closeModal('modalModelo')">&times;</button>
@@ -52,12 +50,12 @@
             <input type="hidden" id="modeloId">
             <div class="modal__body">
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group" style="flex:2;">
                         <label for="modeloNome">Nome do modelo</label>
-                        <input type="text" id="modeloNome" placeholder="Ex: Prova trimestral — Matemática" required>
+                        <input type="text" id="modeloNome" placeholder="Ex: Prova Trimestral de Matemática — 4 Grupos" required>
                     </div>
-                    <div class="form-group">
-                        <label for="modeloTemplate">Layout</label>
+                    <div class="form-group" style="flex:1;">
+                        <label for="modeloTemplate">Layout do Exame</label>
                         <select id="modeloTemplate" required></select>
                     </div>
                 </div>
@@ -77,7 +75,7 @@
                         <select id="modeloTrimestre" required><option value="">Selecione...</option></select>
                     </div>
                     <div class="form-group">
-                        <label style="margin-top:22px">
+                        <label style="margin-top:28px">
                             <input type="checkbox" id="modeloAtivo" checked style="width:auto"> Modelo ativo
                         </label>
                     </div>
@@ -86,18 +84,34 @@
                 <hr class="section-divider">
 
                 <div class="form-group">
-                    <label>Seções da prova <span class="hint">— cada seção sorteia N perguntas de um tipo/nível</span></label>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <label style="margin-bottom:0;">
+                            Grupos da Prova (Escala de 0 a 20 Valores)
+                        </label>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="aplicarModelo4GruposPadrao()" style="font-size:0.75rem; padding:3px 8px;">
+                            ⚡ Preencher Modelo 4 Grupos (20 Val)
+                        </button>
+                    </div>
+
                     <div id="secoesList"></div>
-                    <button type="button" class="btn btn-outline btn-sm" onclick="addSecaoRow()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Adicionar seção
-                    </button>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="addSecaoRow()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Adicionar Grupo / Seção
+                        </button>
+
+                        <div id="indicadorSomaValores" style="font-weight:600; font-size:0.9rem; padding:4px 10px; border-radius:6px; background:#f1f5f9;">
+                            Total: 0 / 20 Valores
+                        </div>
+                    </div>
                 </div>
+
                 <div class="form-error" id="modeloErro"></div>
             </div>
             <div class="modal__footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modalModelo')">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Salvar modelo</button>
+                <button type="submit" class="btn btn-primary" id="btnSalvarModelo">Salvar Modelo</button>
             </div>
         </form>
     </div>

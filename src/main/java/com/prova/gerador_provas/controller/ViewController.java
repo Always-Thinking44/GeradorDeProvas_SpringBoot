@@ -20,6 +20,12 @@ public class ViewController {
     private final ModeloProvaService modeloProvaService;
     private final ProvaGeradaService provaGeradaService;
 
+    /* ── Autenticação ── */
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
     /* ── Dashboard ── */
     @GetMapping("/")
     public String dashboard(Model model) {
@@ -110,6 +116,15 @@ public class ViewController {
         ProvaGerada prova = provaGeradaService.findById(id);
         model.addAllAttributes(provaGeradaService.buildContext(prova, true, false));
         return "exames/" + templatePath(prova.getTemplate());
+    }
+
+    /* ── Gestão de Professores & Acessos (Admin) ── */
+    @GetMapping("/professores")
+    public String professores(Model model) {
+        model.addAttribute("activePage", "professores");
+        model.addAttribute("classes",     classeService.findAll());
+        model.addAttribute("disciplinas", disciplinaService.findAll());
+        return "professores";
     }
 
     private String templatePath(ModeloTemplate template) {

@@ -24,10 +24,21 @@ function preencherFiltros() {
     const selectDisciplina = document.getElementById('filtroDisciplina');
     const selectTrimestre = document.getElementById('filtroTrimestre');
 
-    (window.CLASSES || []).forEach(c => {
+    const user = Auth.getUser();
+    let classesDisponiveis = window.CLASSES || [];
+    let disciplinasDisponiveis = window.DISCIPLINAS || [];
+
+    if (user && user.role === 'ROLE_PROFESSOR' && user.atribuicoes) {
+        const turmasPermitidas = new Set(user.atribuicoes.map(a => Number(a.classeId)));
+        const discPermitidas = new Set(user.atribuicoes.map(a => Number(a.disciplinaId)));
+        classesDisponiveis = classesDisponiveis.filter(c => turmasPermitidas.has(Number(c.id)));
+        disciplinasDisponiveis = disciplinasDisponiveis.filter(d => discPermitidas.has(Number(d.id)));
+    }
+
+    classesDisponiveis.forEach(c => {
         selectClasse.insertAdjacentHTML('beforeend', `<option value="${c.id}">${escapeHtml(c.nome)}</option>`);
     });
-    (window.DISCIPLINAS || []).forEach(d => {
+    disciplinasDisponiveis.forEach(d => {
         selectDisciplina.insertAdjacentHTML('beforeend', `<option value="${d.id}">${escapeHtml(d.nome)}</option>`);
     });
     ENUMS.trimestre.forEach(op => {
@@ -54,7 +65,7 @@ function renderPerguntas(perguntas) {
       <td><span class="badge badge-gray">${labelDoEnum(ENUMS.trimestre, p.trimestre)}</span></td>
       <td><span class="badge ${badgeNivel(p.nivelDificuldade)}">${labelDoEnum(ENUMS.nivelDificuldade, p.nivelDificuldade)}</span></td>
       <td><span class="badge badge-purple">${labelDoEnum(ENUMS.tipoPergunta, p.tipoPergunta)}</span></td>
-      <td><span class="badge badge-gray">${p.pontuacao != null ? p.pontuacao + ' pts' : '—'}</span></td>
+      <td><span class="badge badge-gray">${p.pontuacao != null ? p.pontuacao + ' val' : '1.0 val'}</span></td>
       <td>
         <a class="btn btn-outline btn-sm" href="/classes/${p.classe?.id || ''}">Editar</a>
         <button class="btn btn-danger-ghost btn-sm" onclick="removerPergunta(${p.id})">Excluir</button>
@@ -68,7 +79,16 @@ function filtrar() {
     const disciplinaId = document.getElementById('filtroDisciplina').value;
     const trimestre = document.getElementById('filtroTrimestre').value;
 
-    const filtradas = perguntasCache.filter(p => {
+    const user = Auth.getUser();
+    let base = perguntasCache;
+
+    // Se for professor, restringe a lista de perguntas às turmas atribuídas
+    if (user && user.role === 'ROLE_PROFESSOR' && user.atribuicoes) {
+        const permitidos = new Set(user.atribuicoes.map(a => `${a.classeId}_${a.disciplinaId}`));
+        base = base.filter(p => permitidos.has(`${p.classe?.id}_${p.disciplina?.id}`));
+    }
+
+    const filtradas = base.filter(p => {
         if (classeId && String(p.classe?.id) !== String(classeId)) return false;
         if (disciplinaId && String(p.disciplina?.id) !== String(disciplinaId)) return false;
         if (trimestre && p.trimestre !== trimestre) return false;
@@ -78,10 +98,10 @@ function filtrar() {
 }
 
 async function removerPergunta(id) {
-    if (!confirm('Deseja realmente excluir esta pergunta?')) return;
+    if (!confirm('Deseja realmente excluir esta pergunta do banco?')) return;
     try {
         await Api.removerPergunta(id);
-        toast('Pergunta removida.', 'success');
+        toast('Pergunta removida (inativada no banco).', 'success');
         perguntasCache = perguntasCache.filter(p => String(p.id) !== String(id));
         filtrar();
     } catch (err) {
@@ -95,9 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
     filtrar();
 
     ['filtroClasse', 'filtroDisciplina', 'filtroTrimestre'].forEach(id => {
-        document.getElementById(id).addEventListener('change', filtrar);
+        document.getElementById(id)?.addEventListener('change', filtrar);
     });
-    document.getElementById('btnLimparFiltros').addEventListener('click', () => {
+    document.getElementById('btnLimparFiltros')?.addEventListener('click', () => {
         ['filtroClasse', 'filtroDisciplina', 'filtroTrimestre'].forEach(id => {
             document.getElementById(id).value = '';
         });

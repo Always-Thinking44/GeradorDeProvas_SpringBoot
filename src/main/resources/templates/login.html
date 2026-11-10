@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login — Sistema de Geração de Provas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 20px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 36px 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+        }
+        .login-brand {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-brand .logo-circle {
+            width: 56px;
+            height: 56px;
+            background: #4f46e5;
+            color: #fff;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .login-brand h1 {
+            font-size: 1.4rem;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        .login-brand p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .quick-access-box {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        .quick-access-box h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: #64748b;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .quick-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .quick-btn {
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #334155;
+            cursor: pointer;
+            text-align: left;
+            transition: all .2s;
+        }
+        .quick-btn:hover {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+            color: #4338ca;
+        }
+        .quick-btn strong {
+            display: block;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body class="login-page">
+
+<div class="login-card">
+    <div class="login-brand">
+        <div class="logo-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+        </div>
+        <h1>Gerador de Provas</h1>
+        <p>Acesse o painel escolar com sua conta</p>
+    </div>
+
+    <form id="formLogin">
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" class="form-control" placeholder="seu.email@escola.com" required autocomplete="email"/>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" class="form-control" placeholder="••••••••" required autocomplete="current-password"/>
+        </div>
+
+        <div id="loginErro" style="display: none; padding: 10px; margin-bottom: 16px; background-color: #fee2e2; border: 1px solid #f87171; color: #991b1b; border-radius: 6px; font-size: 0.85rem;"></div>
+
+        <button type="submit" id="btnLogin" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 0.95rem;">
+            Entrar no Sistema
+        </button>
+    </form>
+
+    <div class="quick-access-box">
+        <h4>Acesso Rápido de Teste</h4>
+        <div class="quick-btns">
+            <button type="button" class="quick-btn" onclick="preencherCredenciais('admin@escola.com', 'admin123')">
+                <strong>Administrador</strong>
+                <span>admin@escola.com</span>
+            </button>
+            <button type="button" class="quick-btn" onclick="preencherCredenciais('professor@escola.com', 'prof123')">
+                <strong>Professor</strong>
+                <span>professor@escola.com</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function preencherCredenciais(email, senha) {
+        document.getElementById('email').value = email;
+        document.getElementById('senha').value = senha;
+        document.getElementById('formLogin').dispatchEvent(new Event('submit'));
+    }
+
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const erroDiv = document.getElementById('loginErro');
+        erroDiv.style.display = 'none';
+
+        const email = document.getElementById('email').value.trim();
+        const senha = document.getElementById('senha').value;
+        const btn = document.getElementById('btnLogin');
+
+        btn.disabled = true;
+        btn.textContent = 'Autenticando...';
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha })
+            });
+
+            if (!res.ok) {
+                const erroData = await res.json().catch(() => ({}));
+                throw new Error(erroData.message || 'Credenciais inválidas. Verifique seu email e senha.');
+            }
+
+            const data = await res.json();
+            // Salva token e dados do usuário na sessão local
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify({
+                id: data.id,
+                nome: data.nome,
+                email: data.email,
+                role: data.role,
+                atribuicoes: data.atribuicoes || []
+            }));
+
+            window.location.href = '/';
+        } catch (err) {
+            erroDiv.textContent = err.message;
+            erroDiv.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Entrar no Sistema';
+        }
+    });
+
+    // Se já estiver logado, redireciona para a página principal
+    if (localStorage.getItem('token')) {
+        window.location.href = '/';
+    }
+</script>
+
+</body>
+</html>

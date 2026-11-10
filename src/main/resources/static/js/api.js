@@ -1,16 +1,56 @@
 /* =========================================================================
  * api.js
- * Núcleo compartilhado do frontend: modais, toasts, sanitização, ENUMS,
- * wrapper de chamadas à API REST e carregamento da sidebar de classes.
- *
- * Este arquivo é carregado em TODAS as páginas via fragments/layout ::
- * scriptsComuns, antes do script específico de cada página (index, classe-
- * view, disciplinas, etc). Por isso tudo aqui é exposto em `window`.
+ * Núcleo compartilhado do frontend: autenticação JWT, modais, toasts,
+ * sanitização, ENUMS, wrapper de chamadas à API REST e sidebar dinâmica.
  * ========================================================================= */
 
 /* -------------------------------------------------------------------------
- * Modais (abrir/fechar) — controlados pela classe CSS ".open"
- * (ver style.css: .modal-overlay.open{display:flex})
+ * Autenticação e Sessão do Usuário (JWT)
+ * ---------------------------------------------------------------------- */
+const Auth = {
+    getToken() {
+        return localStorage.getItem('token');
+    },
+    getUser() {
+        try {
+            const raw = localStorage.getItem('user');
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
+    },
+    isAdmin() {
+        return this.getUser()?.role === 'ROLE_ADMIN';
+    },
+    isProfessor() {
+        return this.getUser()?.role === 'ROLE_PROFESSOR';
+    },
+    logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    },
+    verificarAcesso() {
+        const isLoginPage = window.location.pathname.startsWith('/login');
+        const token = this.getToken();
+
+        if (!token && !isLoginPage) {
+            window.location.href = '/login';
+            return false;
+        }
+        if (token && isLoginPage) {
+            window.location.href = '/';
+            return false;
+        }
+        return true;
+    }
+};
+
+// Executa verificação inicial de autenticação
+Auth.verificarAcesso();
+
+/* -------------------------------------------------------------------------
+ * Modais (abrir/fechar)
  * ---------------------------------------------------------------------- */
 function openModal(id) {
     const el = document.getElementById(id);
@@ -24,7 +64,7 @@ function closeModal(id) {
     el.classList.remove('open');
 }
 
-// Fecha ao clicar fora do card do modal (na área escura .modal-overlay)
+// Fecha ao clicar fora do card do modal
 document.addEventListener('click', (e) => {
     if (e.target.classList && e.target.classList.contains('modal-overlay')) {
         e.target.classList.remove('open');
@@ -39,12 +79,11 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* -------------------------------------------------------------------------
- * Toasts (#toastContainer já existe no layout.html)
+ * Toasts
  * ---------------------------------------------------------------------- */
 function toast(mensagem, tipo = 'success') {
     const container = document.getElementById('toastContainer');
     if (!container) {
-        // fallback caso a página não tenha o container por algum motivo
         console.log(`[toast:${tipo}]`, mensagem);
         return;
     }
@@ -56,7 +95,7 @@ function toast(mensagem, tipo = 'success') {
 }
 
 /* -------------------------------------------------------------------------
- * Sanitização simples de HTML (usado ao montar innerHTML dinâmico)
+ * Sanitização simples de HTML
  * ---------------------------------------------------------------------- */
 function escapeHtml(texto) {
     if (texto === null || texto === undefined) return '';
@@ -69,8 +108,7 @@ function escapeHtml(texto) {
 }
 
 /* -------------------------------------------------------------------------
- * ENUMS — precisam bater exatamente com os enums do backend
- * (com.prova.gerador_provas.enums.*)
+ * ENUMS de Domínio
  * ---------------------------------------------------------------------- */
 const ENUMS = {
     trimestre: [
@@ -90,23 +128,42 @@ const ENUMS = {
         { value: 'COMPLETAR',        label: 'Completar' },
     ],
     modeloTemplate: [
-        { value: 'MODELO_1', label: 'Modelo 1 — Clássico' },
+        { value: 'MODELO_1', label: 'Modelo 1 — Clássico (4 Grupos)' },
         { value: 'MODELO_2', label: 'Modelo 2 — Moderno' },
         { value: 'MODELO_3', label: 'Modelo 3 — Compacto' },
     ],
+    roles: [
+        { value: 'ROLE_PROFESSOR', label: 'Professor' },
+        { value: 'ROLE_ADMIN',     label: 'Administrador' },
+    ]
 };
 
 /* -------------------------------------------------------------------------
- * Helper genérico de fetch
+ * Helper genérico de fetch com JWT
  * ---------------------------------------------------------------------- */
 async function request(url, options = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+    };
+
+    const token = Auth.getToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch(url, {
         ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {}),
-        },
+        headers,
     });
+
+    if (res.status === 401 || res.status === 403) {
+        if (!url.includes('/api/auth/login')) {
+            toast('Sessão expirada. Faça login novamente.', 'error');
+            Auth.logout();
+            return null;
+        }
+    }
 
     if (!res.ok) {
         let mensagem = `Erro ${res.status}`;
@@ -128,34 +185,65 @@ async function request(url, options = {}) {
 }
 
 /* -------------------------------------------------------------------------
- * Api — wrapper para os endpoints REST
- *
- * ATENÇÃO: os paths abaixo batem com o que existe HOJE nos controllers
- * (@RequestMapping de cada um). Eles estão inconsistentes entre si
- * (singular/plural/snake_case) — é assim que o backend está, não invente
- * outros paths sem conferir o controller correspondente.
+ * Api — Wrapper para os endpoints REST do Backend
  * ---------------------------------------------------------------------- */
 const Api = {
 
-    /* ---- Classe: /api/classe ---- */
+    /* ---- Usuários e Permissões (RBAC) ---- */
+    listarUsuarios() {
+        return request('/api/usuarios');
+    },
+    listarProfessores() {
+        return request('/api/usuarios/professores');
+    },
+    criarUsuario(payload) {
+        return request('/api/usuarios', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+    },
+    atualizarUsuario(id, payload) {
+        return request(`/api/usuarios/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        });
+    },
+    removerUsuario(id) {
+        return request(`/api/usuarios/${id}`, { method: 'DELETE' });
+    },
+    alterarStatusUsuario(id, ativo) {
+        return request(`/api/usuarios/${id}/status?ativo=${ativo}`, { method: 'PATCH' });
+    },
+
+    /* ---- Atribuições de Turmas ao Professor ---- */
+    listarAtribuicoesProfessor(professorId) {
+        return request(`/api/atribuicoes/professor/${professorId}`);
+    },
+    atribuirProfessor({ professorId, classeId, disciplinaId }) {
+        return request('/api/atribuicoes', {
+            method: 'POST',
+            body: JSON.stringify({ professorId, classeId, disciplinaId }),
+        });
+    },
+    removerAtribuicao(id) {
+        return request(`/api/atribuicoes/${id}`, { method: 'DELETE' });
+    },
+
+    /* ---- Classes (Turmas) ---- */
     listarClasses() {
-        return request('/api/classe');
+        return request('/api/classes');
     },
     criarClasse({ nome }) {
-        return request('/api/classe', {
+        return request('/api/classes', {
             method: 'POST',
             body: JSON.stringify({ nome }),
         });
     },
     removerClasse(id) {
-        return request(`/api/classe/${id}`, { method: 'DELETE' });
+        return request(`/api/classes/${id}`, { method: 'DELETE' });
     },
 
-    /* ---- Disciplina vinculada a uma Classe: /api/classes/{classeId}/disciplinas ----
-     * Disciplina é uma entidade global (nome único no sistema); o vínculo
-     * com a classe é feito via ClasseDisciplina no backend. Estes endpoints
-     * já retornam/recebem só o que importa pra tela da classe.
-     */
+    /* ---- Disciplinas da Classe ---- */
     listarDisciplinas(classeId) {
         return request(`/api/classes/${classeId}/disciplinas`);
     },
@@ -169,13 +257,15 @@ const Api = {
         return request(`/api/classes/${classeId}/disciplinas/${disciplinaId}`, { method: 'DELETE' });
     },
 
-    /* ---- Disciplina (CRUD global, usado em telas fora do contexto de uma
-     * classe específica, ex: /disciplinas, /temas) ---- */
+    /* ---- Disciplinas Globais ---- */
     listarTodasDisciplinas() {
         return request('/api/disciplinas');
     },
+    removerDisciplinaGlobal(id) {
+        return request(`/api/disciplinas/${id}`, { method: 'DELETE' });
+    },
 
-    /* ---- Tema: /api/temas ---- */
+    /* ---- Temas ---- */
     listarTemas() {
         return request('/api/temas');
     },
@@ -194,40 +284,33 @@ const Api = {
         return request(`/api/temas/${id}`, { method: 'DELETE' });
     },
 
-    /* ---- Disciplina (CRUD global) ---- */
-    removerDisciplinaGlobal(id) {
-        return request(`/api/disciplinas/${id}`, { method: 'DELETE' });
-    },
-
-    /* ---- Modelo de prova: /api/modelo_prova ---- */
+    /* ---- Modelos de Prova (0 a 20 Valores) ---- */
     listarModelos() {
-        return request('/api/modelo_prova');
+        return request('/api/modelos-prova');
     },
     listarModelosAtivos() {
-        return request('/api/modelo_prova/ativos');
+        return request('/api/modelos-prova/ativos');
     },
     criarModelo(payload) {
-        return request('/api/modelo_prova', {
+        return request('/api/modelos-prova', {
             method: 'POST',
             body: JSON.stringify(payload),
         });
     },
     atualizarModelo(id, payload) {
-        return request(`/api/modelo_prova/${id}`, {
+        return request(`/api/modelos-prova/${id}`, {
             method: 'PUT',
             body: JSON.stringify(payload),
         });
     },
     removerModelo(id) {
-        return request(`/api/modelo_prova/${id}`, { method: 'DELETE' });
+        return request(`/api/modelos-prova/${id}`, { method: 'DELETE' });
     },
 
-    /* ---- Pergunta: /api/pergunta (singular!) ----
-     * OBS: o backend também não tem filtro por query params no GET —
-     * o filtro por classe/disciplina/trimestre é feito no cliente aqui.
-     */
+    /* ---- Perguntas ---- */
     async listarPerguntas({ classeId, disciplinaId, trimestre } = {}) {
-        const todas = await request('/api/pergunta');
+        const todas = await request('/api/perguntas');
+        if (!todas) return [];
         return todas.filter(p => {
             if (classeId && String(p.classe?.id) !== String(classeId)) return false;
             if (disciplinaId && String(p.disciplina?.id) !== String(disciplinaId)) return false;
@@ -236,27 +319,24 @@ const Api = {
         });
     },
     criarPergunta(payload) {
-        return request('/api/pergunta', {
+        return request('/api/perguntas', {
             method: 'POST',
             body: JSON.stringify(payload),
         });
     },
     atualizarPergunta(id, payload) {
-        return request(`/api/pergunta/${id}`, {
+        return request(`/api/perguntas/${id}`, {
             method: 'PUT',
             body: JSON.stringify(payload),
         });
     },
     removerPergunta(id) {
-        return request(`/api/pergunta/${id}`, { method: 'DELETE' });
+        return request(`/api/perguntas/${id}`, { method: 'DELETE' });
     },
 
-    /* ---- ProvaGerada: /api/prova_gerada ----
-     * A geração agora recebe um JSON no corpo: { classeId, disciplinaId,
-     * trimestre, modelo } — o modelo é o layout (MODELO_1/2/3).
-     */
+    /* ---- Provas Geradas ---- */
     gerarProva({ classeId, disciplinaId, trimestre, modelo, modeloProvaId }) {
-        return request('/api/prova_gerada/generate', {
+        return request('/api/provas-geradas/generate', {
             method: 'POST',
             body: JSON.stringify({
                 classeId: Number(classeId),
@@ -268,31 +348,41 @@ const Api = {
         });
     },
     removerProvaGerada(id) {
-        return request(`/api/prova_gerada/${id}`, { method: 'DELETE' });
+        return request(`/api/provas-geradas/${id}`, { method: 'DELETE' });
     },
 };
 
 /* -------------------------------------------------------------------------
- * Sidebar de classes (lista dinâmica em #classesList)
+ * Sidebar de classes
  * ---------------------------------------------------------------------- */
 async function carregarSidebarClasses() {
     const lista = document.getElementById('classesList');
     if (!lista) return;
 
     try {
-        const classes = await Api.listarClasses();
-        if (!classes || classes.length === 0) {
-            lista.innerHTML = '<li data-empty style="padding:8px 12px;color:var(--text-on-dark-muted);font-size:.8rem">Nenhuma classe cadastrada</li>';
+        let classes = await Api.listarClasses();
+        if (!classes) return;
+
+        // Se o usuário for Professor, filtra apenas as classes atribuídas a ele
+        const user = Auth.getUser();
+        if (user && user.role === 'ROLE_PROFESSOR' && user.atribuicoes) {
+            const turmasPermitidas = new Set(user.atribuicoes.map(a => Number(a.classeId)));
+            classes = classes.filter(c => turmasPermitidas.has(Number(c.id)));
+        }
+
+        if (classes.length === 0) {
+            lista.innerHTML = '<li data-empty style="padding:8px 12px;color:var(--text-on-dark-muted);font-size:.8rem">Nenhuma classe atribuída</li>';
             return;
         }
+
         const ativaId = window.CURRENT_CLASSE_ID ?? null;
         lista.innerHTML = classes.map(c => `
-      <li>
-        <a class="nav-link ${String(ativaId) === String(c.id) ? 'active' : ''}" href="/classes/${c.id}">
-          <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> ${escapeHtml(c.nome)}
-        </a>
-      </li>
-    `).join('');
+          <li>
+            <a class="nav-link ${String(ativaId) === String(c.id) ? 'active' : ''}" href="/classes/${c.id}">
+              <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> ${escapeHtml(c.nome)}
+            </a>
+          </li>
+        `).join('');
     } catch (err) {
         lista.innerHTML = '<li data-empty style="padding:8px 12px;color:var(--text-on-dark-muted);font-size:.8rem">Erro ao carregar classes</li>';
         console.error('Erro ao carregar sidebar de classes:', err);
@@ -300,7 +390,7 @@ async function carregarSidebarClasses() {
 }
 
 /* -------------------------------------------------------------------------
- * Modal global "Nova Classe" — presente em todas as páginas via layout.html
+ * Modal global "Nova Classe"
  * ---------------------------------------------------------------------- */
 function initFormNovaClasse() {
     const form = document.getElementById('formNovaClasse');
@@ -328,7 +418,6 @@ function initFormNovaClasse() {
             closeModal('modalNovaClasse');
             await carregarSidebarClasses();
             document.dispatchEvent(new CustomEvent('classe:criada', { detail: classe }));
-            // Se estivermos no dashboard, os contadores só atualizam num reload
             if (window.location.pathname === '/') {
                 window.location.reload();
             }
@@ -342,9 +431,45 @@ function initFormNovaClasse() {
 }
 
 /* -------------------------------------------------------------------------
+ * Ajustes de Interface de acordo com o Perfil (Admin vs Professor)
+ * ---------------------------------------------------------------------- */
+function aplicarPermissoesInterface() {
+    const user = Auth.getUser();
+    if (!user) return;
+
+    // Atualiza nome e badge na barra de usuário
+    const userBox = document.getElementById('currentUserBox');
+    if (userBox) {
+        const roleLabel = user.role === 'ROLE_ADMIN' ? 'Administrador' : 'Professor';
+        userBox.innerHTML = `
+            <div style="text-align: right; margin-right: 12px;">
+                <div style="font-weight: 600; font-size: 0.9rem; color: #1e293b;">${escapeHtml(user.nome)}</div>
+                <div style="font-size: 0.75rem; color: #64748b;">
+                    <span style="display:inline-block; padding: 1px 6px; border-radius: 4px; font-weight: bold; background: ${user.role === 'ROLE_ADMIN' ? '#e0e7ff; color: #4338ca;' : '#dcfce7; color: #15803d;'}">${roleLabel}</span>
+                </div>
+            </div>
+            <button onclick="Auth.logout()" class="btn btn-outline btn-sm" title="Sair da conta" style="padding: 4px 8px;">
+                Sair
+            </button>
+        `;
+    }
+
+    // Se for Professor, esconde o botão de criar classe na sidebar
+    if (user.role === 'ROLE_PROFESSOR') {
+        const btnNovaClasse = document.querySelector('.sidebar__new-class-btn');
+        if (btnNovaClasse) btnNovaClasse.style.display = 'none';
+
+        // Esconde menu exclusivo de Admin
+        const linkProfessores = document.getElementById('navLinkProfessores');
+        if (linkProfessores) linkProfessores.style.display = 'none';
+    }
+}
+
+/* -------------------------------------------------------------------------
  * Inicialização
  * ---------------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
     carregarSidebarClasses();
     initFormNovaClasse();
+    aplicarPermissoesInterface();
 });
