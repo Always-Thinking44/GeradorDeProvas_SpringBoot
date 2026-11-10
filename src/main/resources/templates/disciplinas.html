@@ -32,8 +32,8 @@
                         <th data-role="admin-only" style="width: 120px;">Ações</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr th:each="d : ${disciplinas}">
+                    <tbody id="tbodyDisciplinas">
+                    <tr th:each="d : ${disciplinas}" th:attr="data-id=${d.id}">
                         <td th:text="${d.nome}">Disciplina</td>
                         <td data-role="admin-only">
                             <button class="btn btn-danger-ghost btn-sm" th:attr="data-id=${d.id}, data-nome=${d.nome}" onclick="removerDisciplina(this.dataset.id, this.dataset.nome)">Excluir</button>

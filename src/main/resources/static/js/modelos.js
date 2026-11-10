@@ -19,7 +19,20 @@ function labelTemplate(v) {
 function renderModelos() {
     const grid = document.getElementById('modelosGrid');
     const empty = document.getElementById('modelosEmpty');
-    const modelos = window.MODELOS || [];
+    let modelos = window.MODELOS || [];
+
+    const user = Auth.getUser();
+    if (user && user.role === 'ROLE_PROFESSOR' && user.atribuicoes) {
+        const paresPermitidos = new Set(
+            user.atribuicoes.map(a => `${a.classeId}_${a.disciplinaId}`)
+        );
+        modelos = modelos.filter(m => {
+            const cId = m.classe?.id;
+            const dId = m.disciplina?.id;
+            if (!cId || !dId) return false;
+            return paresPermitidos.has(`${cId}_${dId}`);
+        });
+    }
 
     if (modelos.length === 0) {
         grid.innerHTML = '';
@@ -95,10 +108,29 @@ function preencherSelectsModelo() {
         selectClasse.insertAdjacentHTML('beforeend', `<option value="${c.id}">${escapeHtml(c.nome)}</option>`);
     });
 
-    selectDisciplina.innerHTML = '<option value="">Selecione...</option>';
-    disciplinasDisponiveis.forEach(d => {
-        selectDisciplina.insertAdjacentHTML('beforeend', `<option value="${d.id}">${escapeHtml(d.nome)}</option>`);
-    });
+    const atualizarDisciplinasDoModelo = () => {
+        const classeId = Number(selectClasse.value);
+        let discs = disciplinasDisponiveis;
+        if (user && user.role === 'ROLE_PROFESSOR' && user.atribuicoes && classeId) {
+            const discNaClasse = new Set(
+                user.atribuicoes
+                    .filter(a => Number(a.classeId) === classeId)
+                    .map(a => Number(a.disciplinaId))
+            );
+            discs = discs.filter(d => discNaClasse.has(Number(d.id)));
+        }
+        const valAtual = selectDisciplina.value;
+        selectDisciplina.innerHTML = '<option value="">Selecione...</option>';
+        discs.forEach(d => {
+            selectDisciplina.insertAdjacentHTML('beforeend', `<option value="${d.id}">${escapeHtml(d.nome)}</option>`);
+        });
+        if (valAtual && discs.some(d => Number(d.id) === Number(valAtual))) {
+            selectDisciplina.value = valAtual;
+        }
+    };
+
+    selectClasse.addEventListener('change', atualizarDisciplinasDoModelo);
+    atualizarDisciplinasDoModelo();
 
     selectTrimestre.innerHTML = '<option value="">Selecione...</option>';
     ENUMS.trimestre.forEach(op => {

@@ -16,6 +16,8 @@ import java.util.List;
 @Table(name = "usuarios")
 @Getter
 @Setter
+@ToString(exclude = "atribuicoes")
+@EqualsAndHashCode(exclude = "atribuicoes")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

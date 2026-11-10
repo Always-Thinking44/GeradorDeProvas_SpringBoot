@@ -113,7 +113,18 @@ function labelDoEnum(lista, value) {
  * ---------------------------------------------------------------------- */
 async function carregarDisciplinas() {
     try {
-        disciplinasCache = await Api.listarDisciplinas(CLASSE_ID) || [];
+        let todas = await Api.listarDisciplinas(CLASSE_ID) || [];
+        const user = Auth.getUser();
+        if (user && user.role === 'ROLE_PROFESSOR' && user.atribuicoes) {
+            const discPermitidas = new Set(
+                user.atribuicoes
+                    .filter(a => Number(a.classeId) === CLASSE_ID)
+                    .map(a => Number(a.disciplinaId))
+            );
+            disciplinasCache = todas.filter(d => discPermitidas.has(Number(d.id)));
+        } else {
+            disciplinasCache = todas;
+        }
     } catch (err) {
         toast('Erro ao carregar disciplinas: ' + err.message, 'error');
         disciplinasCache = [];

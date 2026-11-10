@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface AtribuicaoProfessorRepository extends JpaRepository<AtribuicaoProfessor, Long> {
     List<AtribuicaoProfessor> findByProfessorId(Long professorId);
+    List<AtribuicaoProfessor> findByProfessorIdAndClasseId(Long professorId, Long classeId);
     boolean existsByProfessorIdAndClasseIdAndDisciplinaId(Long professorId, Long classeId, Long disciplinaId);
     void deleteByProfessorId(Long professorId);
 }

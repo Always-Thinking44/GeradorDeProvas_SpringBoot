@@ -110,6 +110,11 @@ document.getElementById('filtroUsuario')?.addEventListener('input', (e) => {
 /* -------------------------------------------------------------------------
  * Modal de Criação / Edição de Usuário
  * ---------------------------------------------------------------------- */
+function abrirModalNovoUsuario() {
+    resetFormUsuario();
+    openModal('modalNovoUsuario');
+}
+
 function editarUsuario(id) {
     const u = usuariosCache.find(x => x.id === id);
     if (!u) return;
@@ -117,12 +122,31 @@ function editarUsuario(id) {
     document.getElementById('usuarioId').value = u.id;
     document.getElementById('usuarioNome').value = u.nome;
     document.getElementById('usuarioEmail').value = u.email;
-    document.getElementById('usuarioSenha').value = '';
+    const senhaInput = document.getElementById('usuarioSenha');
+    if (senhaInput) {
+        senhaInput.value = '';
+        senhaInput.required = false;
+    }
     document.getElementById('usuarioRole').value = u.role;
     document.getElementById('modalUsuarioTitulo').textContent = `Editar Usuário #${u.id}`;
-    document.getElementById('ajudaSenha').style.display = 'block';
+    const ajuda = document.getElementById('ajudaSenha');
+    if (ajuda) ajuda.style.display = 'block';
+    const erroBox = document.getElementById('usuarioErro');
+    if (erroBox) erroBox.style.display = 'none';
 
     openModal('modalNovoUsuario');
+}
+
+function resetFormUsuario() {
+    document.getElementById('formUsuario')?.reset();
+    document.getElementById('usuarioId').value = '';
+    document.getElementById('modalUsuarioTitulo').textContent = 'Novo Utilizador';
+    const ajuda = document.getElementById('ajudaSenha');
+    if (ajuda) ajuda.style.display = 'none';
+    const senhaInput = document.getElementById('usuarioSenha');
+    if (senhaInput) senhaInput.required = true;
+    const erroBox = document.getElementById('usuarioErro');
+    if (erroBox) erroBox.style.display = 'none';
 }
 
 document.getElementById('formUsuario')?.addEventListener('submit', async (e) => {
@@ -140,16 +164,16 @@ document.getElementById('formUsuario')?.addEventListener('submit', async (e) => 
         if (id) {
             // Edição
             await Api.atualizarUsuario(id, { nome, email, senha, role });
-            toast(`Usuário "${nome}" atualizado com sucesso!`);
+            toast(`Utilizador "${nome}" atualizado com sucesso!`);
         } else {
             // Criação
             if (!senha || senha.length < 6) {
-                toast('A senha deve ter no mínimo 6 caracteres', 'error');
+                toast('A palavra-passe deve ter no mínimo 6 caracteres', 'error');
                 btn.disabled = false;
                 return;
             }
             await Api.criarUsuario({ nome, email, senha, role });
-            toast(`Usuário "${nome}" cadastrado com sucesso!`);
+            toast(`Utilizador "${nome}" cadastrado com sucesso!`);
         }
 
         closeModal('modalNovoUsuario');
@@ -162,12 +186,13 @@ document.getElementById('formUsuario')?.addEventListener('submit', async (e) => 
     }
 });
 
-function resetFormUsuario() {
-    document.getElementById('formUsuario')?.reset();
-    document.getElementById('usuarioId').value = '';
-    document.getElementById('modalUsuarioTitulo').textContent = 'Novo Usuário';
-    document.getElementById('ajudaSenha').style.display = 'none';
-}
+// Tornar funções acessíveis globalmente no escopo de janela
+window.abrirModalNovoUsuario = abrirModalNovoUsuario;
+window.editarUsuario = editarUsuario;
+window.resetFormUsuario = resetFormUsuario;
+window.alternarStatus = alternarStatus;
+window.abrirModalAtribuicoes = abrirModalAtribuicoes;
+window.removerAtribuicao = removerAtribuicao;
 
 async function alternarStatus(id, novoStatus) {
     try {

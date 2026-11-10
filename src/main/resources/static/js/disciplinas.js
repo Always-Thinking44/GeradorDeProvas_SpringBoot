@@ -14,6 +14,30 @@ async function removerDisciplina(id, nome) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Se for professor, exibe apenas as disciplinas atribuídas a ele
+    const user = Auth.getUser();
+    if (user && user.role === 'ROLE_PROFESSOR') {
+        const idsPermitidos = new Set(
+            (user.atribuicoes || []).map(a => Number(a.disciplinaId))
+        );
+        const rows = document.querySelectorAll('#tbodyDisciplinas tr');
+        let totalVisiveis = 0;
+        rows.forEach(tr => {
+            const rawId = tr.getAttribute('data-id');
+            const id = Number(rawId);
+            if (rawId && !idsPermitidos.has(id)) {
+                tr.remove();
+            } else if (rawId) {
+                totalVisiveis++;
+            }
+        });
+
+        const empty = document.getElementById('disciplinasEmpty');
+        if (empty) {
+            empty.style.display = totalVisiveis === 0 ? 'block' : 'none';
+        }
+    }
+
     const form = document.getElementById('formNovaDisciplina');
     if (!form) return;
 

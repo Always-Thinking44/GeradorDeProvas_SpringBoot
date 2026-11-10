@@ -110,6 +110,21 @@ async function removerPergunta(id) {
 
 document.addEventListener('DOMContentLoaded', () => {
     perguntasCache = window.PERGUNTAS || [];
+
+    // Se for professor, restringe a lista inicial apenas às turmas e disciplinas atribuídas
+    const user = Auth.getUser();
+    if (user && user.role === 'ROLE_PROFESSOR' && user.atribuicoes) {
+        const paresPermitidos = new Set(
+            user.atribuicoes.map(a => `${a.classeId}_${a.disciplinaId}`)
+        );
+        perguntasCache = perguntasCache.filter(p => {
+            const cId = p.classe?.id;
+            const dId = p.disciplina?.id;
+            if (!cId || !dId) return false;
+            return paresPermitidos.has(`${cId}_${dId}`);
+        });
+    }
+
     preencherFiltros();
     filtrar();
 
