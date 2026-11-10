@@ -60,4 +60,4 @@ Sistema completo para gestão de banco de questões educacionais e geração int
 cd gerador-provas
 ./mvnw spring-boot:run
 ```
-Acesse `http://localhost:8080`.
+Acesse `http://localhost:8085`.
