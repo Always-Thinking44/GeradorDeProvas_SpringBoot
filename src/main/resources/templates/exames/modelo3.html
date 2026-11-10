@@ -30,6 +30,10 @@
     ul.alternativas { list-style: none; padding-left: 16px; }
     ul.alternativas li { margin: 1px 0; }
     ul.alternativas li.correta { color: #166534; font-weight: bold; }
+    ul.afirmacoes-vf { list-style: none; padding-left: 16px; }
+    ul.afirmacoes-vf li { margin: 3px 0; }
+    .vf-box { font-family: monospace, sans-serif; font-weight: bold; margin-right: 4px; }
+    .vf-box.vf-correta { color: #166534; font-weight: bold; }
     .letra { font-weight: bold; margin-right: 4px; }
     .check { color: #166534; font-weight: bold; margin-left: 6px; }
 
@@ -82,12 +86,25 @@
           <span class="q-cota" th:if="${q.pontuacao != null}" th:text="' (' + ${q.pontuacao} + ' val)'"></span>
         </div>
 
-        <th:block th:if="${#strings.equals(q.tipoPergunta, 'ESCOLHA_MULTIPLA') or #strings.equals(q.tipoPergunta, 'VERDADEIRO_FALSO')}">
+        <!-- Escolha Múltipla -->
+        <th:block th:if="${#strings.equals(q.tipoPergunta, 'ESCOLHA_MULTIPLA')}">
           <ul class="alternativas">
             <li th:each="r, rs : ${q.respostas}" th:classappend="${mostrarGabarito and r.correta} ? 'correta'">
               <span class="letra" th:text="${r.letra} + ')'"></span>
               <span th:text="${r.descricao}"></span>
               <span class="check" th:if="${mostrarGabarito and r.correta}" th:text="'[CORRETA]'"></span>
+            </li>
+          </ul>
+        </th:block>
+
+        <!-- Verdadeiro ou Falso (Opção 2: Múltiplas Afirmações) -->
+        <th:block th:if="${#strings.equals(q.tipoPergunta, 'VERDADEIRO_FALSO')}">
+          <ul class="afirmacoes-vf">
+            <li th:each="r, rs : ${q.respostas}">
+              <span class="letra" th:text="${r.letra} + ')'"></span>
+              <span class="vf-box" th:if="${!mostrarGabarito}">( &nbsp;&nbsp;&nbsp; )</span>
+              <span class="vf-box vf-correta" th:if="${mostrarGabarito}" th:text="${r.correta} ? '( V )' : '( F )'"></span>
+              <span th:text="${r.descricao}"></span>
             </li>
           </ul>
         </th:block>

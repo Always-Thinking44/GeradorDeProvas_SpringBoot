@@ -52,7 +52,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         document.getElementById('perguntaTipo').addEventListener('change', onTipoPerguntaChange);
-        document.getElementById('btnAddResposta').addEventListener('click', () => addRespostaRow());
+        document.getElementById('btnAddResposta').addEventListener('click', () => {
+            const tipo = document.getElementById('perguntaTipo').value;
+            if (tipo === 'VERDADEIRO_FALSO') {
+                addAfirmacaoVfRow();
+            } else {
+                addRespostaRow();
+            }
+        });
 
         document.getElementById('btnNovaPergunta').addEventListener('click', () => {
             resetFormNovaPergunta(montarContextoParaNovaPergunta());
@@ -455,14 +462,16 @@ async function editarPergunta(id) {
             const list = document.getElementById('respostasList');
             list.innerHTML = '';
             respostaIdCounter = 0;
-            p.respostas.forEach(r => {
-                const bloqueada = (p.tipoPergunta === 'VERDADEIRO_FALSO');
-                addRespostaRow(r.descricao || '', r.correta, bloqueada, {
-                    selecaoUnica: bloqueada,
-                });
-            });
-            if (p.tipoPergunta === 'ESCOLHA_MULTIPLA') {
+            if (p.tipoPergunta === 'VERDADEIRO_FALSO') {
+                p.respostas.forEach(r => addAfirmacaoVfRow(r.descricao || '', r.correta));
                 document.getElementById('btnAddResposta').style.display = 'inline-flex';
+            } else {
+                p.respostas.forEach(r => {
+                    addRespostaRow(r.descricao || '', r.correta, false);
+                });
+                if (p.tipoPergunta === 'ESCOLHA_MULTIPLA') {
+                    document.getElementById('btnAddResposta').style.display = 'inline-flex';
+                }
             }
         }
 
@@ -537,9 +546,13 @@ function onTipoPerguntaChange() {
     if (tipo === 'VERDADEIRO_FALSO') {
         respostasList.innerHTML = '';
         respostaIdCounter = 0;
-        addRespostaRow('Verdadeiro', true, true, { selecaoUnica: true });
-        addRespostaRow('Falso', false, true, { selecaoUnica: true });
-        btnAdd.style.display = 'none';
+        btnAdd.style.display = 'inline-flex';
+        btnAdd.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Adicionar afirmação
+        `;
+        addAfirmacaoVfRow('', true);
+        addAfirmacaoVfRow('', false);
         return;
     }
 
@@ -552,11 +565,36 @@ function onTipoPerguntaChange() {
         return;
     }
 
+    // ESCOLHA_MULTIPLA
     btnAdd.style.display = 'inline-flex';
+    btnAdd.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Adicionar resposta
+    `;
     if (respostasList.children.length === 0) {
         addRespostaRow();
         addRespostaRow();
     }
+}
+
+function addAfirmacaoVfRow(texto = '', correta = true) {
+    const id = `vf_${respostaIdCounter++}`;
+    const list = document.getElementById('respostasList');
+    const row = document.createElement('div');
+    row.className = 'resposta-row vf-row';
+    row.dataset.id = id;
+    row.innerHTML = `
+        <input type="text" placeholder="Texto da afirmação (ex: Luanda é a capital de Angola)" value="${escapeHtml(texto)}" style="flex:1;">
+        <select class="vf-toggle" style="width:145px; flex:none; height:38px; border-radius:6px; font-weight:600; padding:0 8px; border:1.5px solid var(--border);">
+            <option value="true" ${correta ? 'selected' : ''}>Verdadeira (V)</option>
+            <option value="false" ${!correta ? 'selected' : ''}>Falsa (F)</option>
+        </select>
+        <button type="button" class="remove-resposta btn-danger-ghost" title="Remover afirmação" style="padding:2px 6px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    `;
+    row.querySelector('.remove-resposta')?.addEventListener('click', () => row.remove());
+    list.appendChild(row);
 }
 
 function addRespostaRow(texto = '', correta = false, bloqueada = false, opts = {}) {
@@ -576,24 +614,20 @@ function addRespostaRow(texto = '', correta = false, bloqueada = false, opts = {
   `;
     row.querySelector('.remove-resposta')?.addEventListener('click', () => row.remove());
 
-    // NOVO: em tipos de seleção única (ex: Verdadeiro/Falso), marcar uma desmarca as outras
-    if (opts.selecaoUnica) {
-        const checkbox = row.querySelector('input[type=checkbox]');
-        checkbox.addEventListener('change', () => {
-            if (checkbox.checked) {
-                list.querySelectorAll('.resposta-row input[type=checkbox]').forEach(cb => {
-                    if (cb !== checkbox) cb.checked = false;
-                });
-            }
-        });
-    }
-
     list.appendChild(row);
 }
 
 function coletarRespostas() {
     const tipo = document.getElementById('perguntaTipo').value;
     if (tipo === 'DESENVOLVIMENTO') return [];
+
+    if (tipo === 'VERDADEIRO_FALSO') {
+        const rows = document.querySelectorAll('#respostasList .vf-row');
+        return Array.from(rows).map(row => ({
+            descricao: row.querySelector('input[type=text]').value.trim(),
+            correta: row.querySelector('.vf-toggle').value === 'true',
+        }));
+    }
 
     const rows = document.querySelectorAll('#respostasList .resposta-row');
     return Array.from(rows).map(row => ({
@@ -620,11 +654,11 @@ async function onSubmitNovaPergunta(e) {
         erro.style.display = 'block';
         return;
     }
-    if (tipoPergunta !== 'DESENVOLVIMENTO') {
+    if (tipoPergunta === 'ESCOLHA_MULTIPLA') {
         const semTexto = respostas.some(r => !r.descricao);
         const semCorreta = !respostas.some(r => r.correta);
-        if (respostas.length === 0 || semTexto) {
-            erro.textContent = 'Preencha o texto de todas as respostas.';
+        if (respostas.length < 2 || semTexto) {
+            erro.textContent = 'Preencha o texto de pelo menos duas opções de resposta.';
             erro.style.display = 'block';
             return;
         }
@@ -633,16 +667,20 @@ async function onSubmitNovaPergunta(e) {
             erro.style.display = 'block';
             return;
         }
-
-        // NOVO: Verdadeiro/Falso e Completar exigem exatamente UMA resposta correta
-        if ((tipoPergunta === 'VERDADEIRO_FALSO' || tipoPergunta === 'COMPLETAR')) {
-            const totalCorretas = respostas.filter(r => r.correta).length;
-            if (totalCorretas !== 1) {
-                erro.textContent = 'Este tipo de pergunta exige exatamente uma resposta correta.';
-                erro.style.display = 'block';
-                return;
-            }
+    } else if (tipoPergunta === 'VERDADEIRO_FALSO') {
+        const semTexto = respostas.some(r => !r.descricao);
+        if (respostas.length < 2 || semTexto) {
+            erro.textContent = 'Preencha o texto de pelo menos duas afirmações para V ou F.';
+            erro.style.display = 'block';
+            return;
         }
+    } else if (tipoPergunta === 'COMPLETAR') {
+        if (respostas.length === 0 || !respostas[0].descricao) {
+            erro.textContent = 'Informe a resposta correta da lacuna.';
+            erro.style.display = 'block';
+            return;
+        }
+    }
     }
 
     const payload = {

@@ -50,8 +50,8 @@ public class PerguntaService {
         }
 
         if (pergunta.getTipoPergunta() == TipoPergunta.VERDADEIRO_FALSO
-                && (pergunta.getRespostas() == null || pergunta.getRespostas().size() != 2)) {
-            throw new IllegalArgumentException("Perguntas de Verdadeiro ou Falso devem ter exatamente duas opções.");
+                && (pergunta.getRespostas() == null || pergunta.getRespostas().size() < 2)) {
+            throw new IllegalArgumentException("Perguntas de Verdadeiro ou Falso devem ter no mínimo duas afirmações.");
         }
 
         return repository.save(pergunta);
@@ -145,13 +145,15 @@ public class PerguntaService {
             throw new IllegalArgumentException("Este tipo de pergunta exige respostas/alternativas cadastradas.");
         }
 
-        long corretas = pergunta.getRespostas()
-                .stream()
-                .filter(r -> Boolean.TRUE.equals(r.getCorreta()))
-                .count();
+        if (pergunta.getTipoPergunta() == TipoPergunta.ESCOLHA_MULTIPLA || pergunta.getTipoPergunta() == TipoPergunta.COMPLETAR) {
+            long corretas = pergunta.getRespostas()
+                    .stream()
+                    .filter(r -> Boolean.TRUE.equals(r.getCorreta()))
+                    .count();
 
-        if (corretas == 0) {
-            throw new IllegalArgumentException("Pelo menos uma resposta correta deve ser indicada.");
+            if (corretas == 0) {
+                throw new IllegalArgumentException("Pelo menos uma resposta correta deve ser indicada.");
+            }
         }
     }
 }
